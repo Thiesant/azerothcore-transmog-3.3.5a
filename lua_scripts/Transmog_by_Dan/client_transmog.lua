@@ -122,7 +122,7 @@ local function HideMainFrame()
     mainFrame:Hide()
 end
 
-mainFrame:SetSize(1000, 600)
+mainFrame:SetSize(1000, 800)
 mainFrame:RegisterForDrag("LeftButton")
 mainFrame:SetPoint("CENTER")
 mainFrame:SetToplevel(true)
@@ -220,34 +220,105 @@ local function OnEnterItemToolTip(btn)
 	GameTooltip:Show()
 end
 
+local backdropInfo =
+					{						
+						bgFile = "Interface\\Transmog\\UI-PaperBackground", 
+						edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border", 
+						tile = false, tileEdge = true, tileSize = 16, edgeSize = 16, 
+						insets = { left = 4, right = 4, top = 4, bottom = 4 }
+					};
+
 function InitTabSlots()
 	local lastSlot
 	local firstInRowSlot
-	for i = 1, 56, 1 do -- 8x7 slots
-		local itemChild
-		if ( i == 1 ) then
-			itemChild = CreateFrame("Button", nil, innerFrame, "ItemButtonTemplate")
-			itemChild:SetPoint("TOPLEFT", 70, -70)
+	for i = 1, 8, 1 do
+	local itemChild
+	if ( i == 1 ) then
+		itemChild = CreateFrame("Frame", nil, mainFrame) 
+		itemChild:SetPoint("TOPLEFT", 85, -70)
+		firstInRowSlot = itemChild
+	else
+		if ( i == 5 ) then
+			itemChild = CreateFrame("Frame", nil, firstInRowSlot)
+			itemChild:SetPoint("RIGHT", 0, -290)
 			firstInRowSlot = itemChild
 		else
-			if ( i == 9 or i == 17 or i == 25 or i == 33 or i == 41 or i == 49 ) then
-				itemChild = CreateFrame("Button", nil, firstInRowSlot, "ItemButtonTemplate")
-				itemChild:SetPoint("RIGHT", 0, -50)
-				firstInRowSlot = itemChild
-			else
-				itemChild = CreateFrame("Button", nil, lastSlot, "ItemButtonTemplate")
-				itemChild:SetPoint("RIGHT", 117.2, 0)
-			end
+			itemChild = CreateFrame("Button", nil, lastSlot)
+			itemChild:SetPoint("RIGHT", 210, 0)
 		end
-		
-		itemChild:SetScript("OnClick", OnClickItemTransmogButton)
-		itemChild:SetScript("OnEnter", OnEnterItemToolTip)
-		itemChild:SetScript("OnLeave", OnLeaveItemToolTip)
-		itemChild:RegisterForClicks("AnyUp");
-		itemChild:Disable()
-		lastSlot = itemChild
-		table.insert(itemButtons, itemChild)
 	end
+	
+	itemChild:SetWidth(200)
+	itemChild:SetHeight(280)
+	itemChild:SetBackdrop(backdropInfo)
+	--itemChild:SetClipsChildren(true)
+	local rightTopItemFrame = CreateFrame("Frame", nil, itemChild)
+	rightTopItemFrame:SetPoint("TOPRIGHT", -5, -5)
+	rightTopItemFrame:SetSize(45, 225)
+	local rightTopTexture = rightTopItemFrame:CreateTexture()
+	rightTopTexture:SetTexture(DressUpTexturePath().."2")
+	rightTopTexture:SetAllPoints()
+	local rightBottomItemFrame = CreateFrame("Frame", nil, itemChild)
+	rightBottomItemFrame:SetPoint("BOTTOMRIGHT", -5, -30)
+	rightBottomItemFrame:SetSize(45, 85)
+	local rightBottomTexture = rightBottomItemFrame:CreateTexture()
+	rightBottomTexture:SetTexture(DressUpTexturePath().."4")
+	rightBottomTexture:SetAllPoints()
+	local leftTopItemFrame = CreateFrame("Frame", nil, itemChild)
+	leftTopItemFrame:SetPoint("TOPLEFT", 5, -5)
+	leftTopItemFrame:SetSize(145, 225)
+	local leftTopTexture = leftTopItemFrame:CreateTexture()
+	leftTopTexture:SetTexture(DressUpTexturePath().."1")
+	leftTopTexture:SetAllPoints()
+	local leftBottomItemFrame = CreateFrame("Frame", nil, itemChild)
+	leftBottomItemFrame:SetPoint("BOTTOMLEFT", 5, -30)
+	leftBottomItemFrame:SetSize(145, 85)
+	local leftBottomTexture = leftBottomItemFrame:CreateTexture()
+	leftBottomTexture:SetTexture(DressUpTexturePath().."3")
+	leftBottomTexture:SetAllPoints()
+	local itemModel = CreateFrame("DressUpModel", "ItemModel", itemChild, "ModelTemplate")
+	itemModel:SetPoint("CENTER", 0, -20)
+	itemModel:SetSize(256, 256)
+	itemModel:SetUnit("player")
+	itemModel:Hide()
+	local itemButton = CreateFrame("Button", nil, leftBottomItemFrame, "ItemButtonTemplate")
+	itemButton:SetPoint("BOTTOMLEFT", 5, 40)
+	itemButton:SetScript("OnClick", OnClickItemTransmogButton)
+	itemButton:SetScript("OnEnter", OnEnterItemToolTip)
+	itemButton:SetScript("OnLeave", OnLeaveItemToolTip)
+	itemButton:RegisterForClicks("AnyUp");
+	itemButton:Disable()
+	lastSlot = itemChild
+	itemChild.itemModel = itemModel
+	itemChild.itemButton = itemButton
+	table.insert(itemButtons, itemChild)
+	end
+	
+	--for i = 1, 56, 1 do -- 8x7 slots
+		--local itemChild
+		--if ( i == 1 ) then
+			--itemChild = CreateFrame("Button", nil, innerFrame, "ItemButtonTemplate")
+			--itemChild:SetPoint("TOPLEFT", 70, -70)
+			--firstInRowSlot = itemChild
+		--else
+			--if ( i == 9 or i == 17 or i == 25 or i == 33 or i == 41 or i == 49 ) then
+				--itemChild = CreateFrame("Button", nil, firstInRowSlot, "ItemButtonTemplate")
+				--itemChild:SetPoint("RIGHT", 0, -50)
+				--firstInRowSlot = itemChild
+			--else
+				--itemChild = CreateFrame("Button", nil, lastSlot, "ItemButtonTemplate")
+				--itemChild:SetPoint("RIGHT", 117.2, 0)
+			--end
+		--end
+		
+		--itemChild:SetScript("OnClick", OnClickItemTransmogButton)
+		--itemChild:SetScript("OnEnter", OnEnterItemToolTip)
+		--itemChild:SetScript("OnLeave", OnLeaveItemToolTip)
+		--itemChild:RegisterForClicks("AnyUp");
+		--itemChild:Disable()
+		--lastSlot = itemChild
+		--table.insert(itemButtons, itemChild)
+	--end
 end
 
 InitTabSlots()
@@ -519,13 +590,24 @@ function TransmogHandlers.InitTab(player, newSlotItemIds, page, hasMorePages) --
 	-- Todo add pagination and reset tab buttons here later
 	for i, child in ipairs(itemButtons) do
 		if ( currentSlotItemIds[i] == nil ) then
-			SetItemButtonTexture(child, "")
 			child:SetID(0)
-			child:Disable()
+			child.itemButton:SetID(0)
+			SetItemButtonTexture(child.itemButton, "")
+			child.itemButton:Disable()
+			child.itemModel:Hide()
 		else
-			SetItemButtonTexture(child, GetItemIcon(currentSlotItemIds[i]))
 			child:SetID(currentSlotItemIds[i])
-			child:Enable()
+			child.itemButton:SetID(currentSlotItemIds[i])
+			SetItemButtonTexture(child.itemButton, GetItemIcon(currentSlotItemIds[i]))
+			child.itemButton:Enable()
+			child.itemModel:Show()
+			if ( currentSlot == PLAYER_VISIBLE_ITEM_15_ENTRYID ) then
+				child.itemModel:SetRotation(180, false)
+			else
+				child.itemModel:SetRotation(0, false)
+			end
+			child.itemModel:Undress()
+			child.itemModel:TryOn(currentSlotItemIds[i])
 		end
 	end
 end

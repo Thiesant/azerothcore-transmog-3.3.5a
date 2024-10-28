@@ -1,0 +1,132 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+	<Script file="client_transmog.lua"/>
+	<Font name="Arrows" font="Interface\AddOns\transmog_by_dan\assets\Arrows.ttf" inherits="GameFontNormal">
+		<FontHeight>
+			<AbsValue val="12"/>
+		</FontHeight>
+	</Font>
+	<Font name="ArrowsDisabled" font="Interface\AddOns\transmog_by_dan\assets\Arrows.ttf" inherits="GameFontDisable">
+		<FontHeight>
+			<AbsValue val="12"/>
+		</FontHeight>
+	</Font>
+	<Font name="ArrowsHighlight" font="Interface\AddOns\transmog_by_dan\assets\Arrows.ttf" inherits="GameFontHighlight">
+		<FontHeight>
+			<AbsValue val="12"/>
+		</FontHeight>
+	</Font>
+	<Frame name="TransmogFrame" parent="UIParent" toplevel="true" setAllPoints="true" id="6" hidden="true" enableMouse="true" movable="true" frameStrata="HIGH" inherits="UIPanelDialogTemplate">
+		<Size x="1000" y="800"/>
+		<Anchors>
+			<Anchor point="CENTER" relativeTo="UIParent"/>
+		</Anchors>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture name="$parentDialogBG" hWrapMode="true" vWrapMode="true" vertTile="true" horizTile="true" file="Interface\AddOns\transmog_by_dan\assets\CollectionsBackgroundTile">
+					<Size x="1000" y="768"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="8" y="-24"/>
+						<Anchor point="BOTTOMRIGHT" x="-6" y="8"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY">
+				<FontString name="Title" text="Transmog" parentKey="TitleText" inherits="GameFontNormal">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="12" y="-8"/>
+						<Anchor point="TOPRIGHT" x="-32" y="-8"/>
+					</Anchors>
+                </FontString>
+				<FontString name="SearchString" text="Search:" inherits="GameFontNormal">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" x="40" y="90"/>
+					</Anchors>
+                </FontString>
+				<FontString name="TransmogPaginationText" text="Page 1" inherits="GameFontNormalLarge">
+					<Anchors>
+						<Anchor point="BOTTOM" x="0" y="112"/>
+					</Anchors>
+					<Color r="1" g="1" b="1" a="1"/>
+					<Shadow>
+						<Offset x="1" y="-1" />
+						<Color r="0" g="0" b="0"/>
+					</Shadow>
+                </FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button name="SaveButton" text="Save" inherits="UIPanelButtonTemplate">
+				<Size x="100" y="30"/>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT" x="-40" y="82"/>
+				</Anchors>
+				<Scripts>
+					<OnClick function="OnClickApplyAllowTransmogs"/>
+				</Scripts>
+			</Button>
+			<Button name="ResetButton" text="Empty Slot" inherits="UIPanelButtonTemplate" >
+				<Size x="100" y="30"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="SaveButton" x="-110" y="0"/>
+				</Anchors>
+				<Scripts>
+					<OnClick function="OnClickResetCurrentTransmogSlot"/>
+				</Scripts>
+			</Button>
+			<Button name="ResetAllButton" text="Empty All" inherits="UIPanelButtonTemplate">
+				<Size x="100" y="30"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="ResetButton" x="-110" y="0"/>
+				</Anchors>
+				<Scripts>
+					<OnClick function="OnClickResetAllButton"/>
+				</Scripts>
+			</Button>
+			<Button name="LeftButton" text="d" inherits="UIPanelButtonTemplate">
+				<Size x="40" y="30"/>
+				<NormalFont style="Arrows"/>
+				<DisabledFont style="ArrowsDisabled"/>
+				<HighlightFont style="ArrowsHighlight"/>
+				<Anchors>
+					<Anchor point="BOTTOM" x="-80" y="102"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>self:Disable()</OnLoad>
+					<OnClick function="OnClickPrevPage"/>
+				</Scripts>
+			</Button>
+			<Button name="RightButton" text="F" inherits="UIPanelButtonTemplate">
+				<Size x="40" y="30"/>
+				<NormalFont style="Arrows"/>
+				<DisabledFont style="ArrowsDisabled"/>
+				<HighlightFont style="ArrowsHighlight"/>
+				<Anchors>
+					<Anchor point="BOTTOM" x="80" y="102"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>self:Disable()</OnLoad>
+					<OnClick function="OnClickNextPage"/>
+				</Scripts>
+			</Button>
+			<EditBox name="ItemSearchInput" autoFocus="false" toplevel="true" enableMouse="true" letters="255" inherits="InputBoxTemplate">
+				<Size x="200" y="80"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="SearchString" x="210" y="0"/>
+				</Anchors>
+				<Scripts>
+					<OnEscapePressed>self:ClearFocus();</OnEscapePressed>
+					<OnEnter function="EnterSearchInput"/>
+					<OnLeave function="LeaveSearchInput"/>
+					<OnMouseUp function="SetSearchInputFocus"/>
+				</Scripts>
+			</EditBox>
+		</Frames>
+		<Scripts>
+			<OnLoad function="OnTransmogFrameLoad"/>
+			<OnHide function="OnHideTransmogFrame"/>
+			<OnShow function="OnClickTransmogButton"/>
+			<OnDragStart>self:StartMoving();</OnDragStart>
+			<OnDragStop>self:StopMovingOrSizing();</OnDragStop>
+		</Scripts>
+	</Frame>
+</Ui>

@@ -169,6 +169,7 @@ function Transmog_Load(player)
 		end
 		transmogs:NextRow()
 	end
+	AIO.Handle(player, "Transmog", "LoadTransmogsAfterSave")
 end
 
 function Transmog_OnLogin(event, player)

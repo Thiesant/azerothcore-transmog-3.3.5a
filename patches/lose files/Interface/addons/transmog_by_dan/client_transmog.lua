@@ -117,6 +117,22 @@ local backdropInfo =
 -- TODO timer with wait time if pressed to fast. wait at least 1 second before accepting another call
 -- TODO I key for opening the panel. Add to micro bar down at the bottom
 
+function SetItemButtonTexture(button, texture)
+	if ( not button ) then
+		return;
+	end
+
+	if (button.Icon or button.icon or (button:GetName() ~= nil and _G[button:GetName()] ~= nil and _G[button:GetName().."IconTexture"] ~= nil)) then
+		local icon = button.Icon or button.icon or _G[button:GetName().."IconTexture"];
+		if ( texture ) then
+			icon:Show();
+			_G[button:GetName().."IconTexture"]:SetTexture(texture);
+		else
+			icon:Hide();
+		end
+	end
+end
+
 function TransmogHandlers.SetEquipmentTransmogInfoClient(player, tooltipSlot)
 	if ( currentTooltipSlot == tooltipSlot ) then
 		GameTooltip:AddLine("Item is transmogrified!", 1, 0, 0)
@@ -213,12 +229,13 @@ end)
 --mainRightBottomBackground:SetTexCoord(0, 0.17, 0.02, 0.148)
 
 local function SetCharacterFrameTransmogItemButtonTextures()
-	if ( TransmogFrame:IsShown() ) then
+	--if ( TransmogFrame:IsShown() ) then
 		local textureName = "Interface\\Icons\\INV_Mask_01"
 		if ( currentHeadTransmogId ~= nil and currentHeadTransmogId ~= 0 ) then
 			textureName = GetItemIcon(currentHeadTransmogId)
+		elseif (currentHeadTransmogId == 0) then
+			SetItemButtonTexture(CharacterHeadSlot, textureName) -- TODO Add for everything
 		end
-		SetItemButtonTexture(CharacterHeadSlot, textureName)
 
 
 		if ( currentShoudlerTransmogId ~= nil and currentShoudlerTransmogId ~= 0 ) then
@@ -323,13 +340,53 @@ local function SetCharacterFrameTransmogItemButtonTextures()
 			textureName = "Interface\\Icons\\INV_Mask_01"
 		end
 		SetItemButtonTexture(CharacterTabardSlot, textureName)
-	end
+		return;
+	--end
+end
+
+local function ResetCharacterFrameTransmogItemButtonTextures()
+	PaperDollItemSlotButton_Update(CharacterHeadSlot)
+	PaperDollItemSlotButton_Update(CharacterShoulderSlot)
+	PaperDollItemSlotButton_Update(CharacterShirtSlot)
+	PaperDollItemSlotButton_Update(CharacterChestSlot)
+	PaperDollItemSlotButton_Update(CharacterWaistSlot)
+	PaperDollItemSlotButton_Update(CharacterLegsSlot)
+	PaperDollItemSlotButton_Update(CharacterFeetSlot)
+	PaperDollItemSlotButton_Update(CharacterWristSlot)
+	PaperDollItemSlotButton_Update(CharacterHandsSlot)
+	PaperDollItemSlotButton_Update(CharacterBackSlot)
+	PaperDollItemSlotButton_Update(CharacterMainHandSlot)
+	PaperDollItemSlotButton_Update(CharacterSecondaryHandSlot)
+	PaperDollItemSlotButton_Update(CharacterRangedSlot)
+	PaperDollItemSlotButton_Update(CharacterTabardSlot)
+end
+
+function LoadTransmogsFromCurrentIds()
+	CharacterModelFrameFake:SetUint("player")
+	CharacterModelFrame:SetUnit("player")
+	CharacterModelFrame:Undress()
+	if ( currentHeadTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentHeadTransmogId) end
+	if ( currentShoudlerTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentShoudlerTransmogId) end
+	if ( currentShirtTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentShirtTransmogId) end
+	if ( currentChestTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentChestTransmogId) end
+	if ( currentWaistTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentWaistTransmogId) end
+	if ( currentLegsTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentLegsTransmogId) end
+	if ( currentFeetTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentFeetTransmogId) end
+	if ( currentWristTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentWristTransmogId) end
+	if ( currentHandsTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentHandsTransmogId) end
+	if ( currentBackTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentBackTransmogId) end
+	--if ( currentMainHandTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentMainHandTransmogId, "MAINHANDSLOT") end
+	--if ( currentOffHandTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentOffHandTransmogId, "SECONDARYHANDSLOT") end
+	--if ( currentRangedTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentRangedTransmogId) end
+	if ( currentTabardTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentTabardTransmogId) end
+	ResetCharacterFrameTransmogItemButtonTextures()
 end
 
 local function OnClickItemTransmogButton(btn, buttonType)
 	PlaySound("GAMEGENERICBUTTONPRESS", "master")
+	LoadTransmogsFromCurrentIds()
 	local itemId = btn:GetID()
-	local name, _, _, _, _, _, _, _, _, textureName = GetItemInfo(itemId)
+	local textureName = GetItemIcon(itemId)
 	if ( currentSlot == PLAYER_VISIBLE_ITEM_1_ENTRYID ) then
 		currentHeadTransmogId = itemId
 		CharacterModelFrame:TryOn(itemId)
@@ -407,7 +464,7 @@ function OnClickResetAllButton(btn)
 	currentTabardTransmogId = 0
 	CharacterModelFrame:SetUnit("player")
 	CharacterModelFrame:Undress()
-	SetCharacterFrameTransmogItemButtonTextures()
+	ResetCharacterFrameTransmogItemButtonTextures()
 end
 
 local function OnLeaveItemToolTip(btn)
@@ -428,65 +485,83 @@ local function InitTabSlots()
 	local lastSlot
 	local firstInRowSlot
 	for i = 1, 8, 1 do
-	local itemChild
-	if ( i == 1 ) then
-		itemChild = CreateFrame("Frame", nil, TransmogFrame) 
-		itemChild:SetPoint("TOPLEFT", 85, -70)
-		firstInRowSlot = itemChild
-	else
-		if ( i == 5 ) then
-			itemChild = CreateFrame("Frame", nil, firstInRowSlot)
-			itemChild:SetPoint("RIGHT", 0, -290)
+		local itemChild
+		if ( i == 1 ) then
+			itemChild = CreateFrame("Frame", "ItemChild"..i, TransmogFrame) 
+			itemChild:SetPoint("TOPLEFT", 85, -70)
 			firstInRowSlot = itemChild
 		else
-			itemChild = CreateFrame("Button", nil, lastSlot)
-			itemChild:SetPoint("RIGHT", 210, 0)
+			if ( i == 5 ) then
+				itemChild = CreateFrame("Frame", "ItemChild"..i, firstInRowSlot)
+				itemChild:SetPoint("RIGHT", 0, -290)
+				firstInRowSlot = itemChild
+			else
+				itemChild = CreateFrame("Button", "ItemChild"..i, lastSlot)
+				itemChild:SetPoint("RIGHT", 210, 0)
+			end
 		end
-	end
-	
-	--itemChild:SetFrameLevel(6)
-	itemChild:SetWidth(200)
-	itemChild:SetHeight(280)
-	itemChild:SetBackdrop(backdropInfo)
-	local rightTopItemFrame = CreateFrame("Frame", nil, itemChild)
-	rightTopItemFrame:SetPoint("TOPRIGHT", -4, -5)
-	rightTopItemFrame:SetSize(46, 225)
-	local rightTopTexture = rightTopItemFrame:CreateTexture()
-	rightTopTexture:SetTexture(DressUpTexturePath().."2")
-	rightTopTexture:SetAllPoints()
-	local rightBottomItemFrame = CreateFrame("Frame", nil, itemChild)
-	rightBottomItemFrame:SetPoint("BOTTOMRIGHT", -4, -30)
-	rightBottomItemFrame:SetSize(46, 85)
-	local rightBottomTexture = rightBottomItemFrame:CreateTexture()
-	rightBottomTexture:SetTexture(DressUpTexturePath().."4")
-	rightBottomTexture:SetAllPoints()
-	local leftTopItemFrame = CreateFrame("Frame", nil, itemChild)
-	leftTopItemFrame:SetPoint("TOPLEFT", 4, -5)
-	leftTopItemFrame:SetSize(146, 225)
-	local leftTopTexture = leftTopItemFrame:CreateTexture()
-	leftTopTexture:SetTexture(DressUpTexturePath().."1")
-	leftTopTexture:SetAllPoints()
-	local leftBottomItemFrame = CreateFrame("Frame", nil, itemChild)
-	leftBottomItemFrame:SetPoint("BOTTOMLEFT", 4, -30)
-	leftBottomItemFrame:SetSize(146, 85)
-	local leftBottomTexture = leftBottomItemFrame:CreateTexture()
-	leftBottomTexture:SetTexture(DressUpTexturePath().."3")
-	leftBottomTexture:SetAllPoints()
-	local itemModel = CreateFrame("DressUpModel", "ItemModel", itemChild, "ModelTemplate")
-	itemModel:SetPoint("CENTER", 0, -20)
-	itemModel:SetSize(256, 256)
-	itemModel:Hide()
-	local itemButton = CreateFrame("Button", nil, leftBottomItemFrame, "ItemButtonTemplate")
-	itemButton:SetPoint("BOTTOMLEFT", 5, 40)
-	itemButton:SetScript("OnClick", OnClickItemTransmogButton)
-	itemButton:SetScript("OnEnter", OnEnterItemToolTip)
-	itemButton:SetScript("OnLeave", OnLeaveItemToolTip)
-	itemButton:RegisterForClicks("AnyUp");
-	itemButton:Disable()
-	lastSlot = itemChild
-	itemChild.itemModel = itemModel
-	itemChild.itemButton = itemButton
-	table.insert(itemButtons, itemChild)
+		
+		--itemChild:SetFrameLevel(6)
+		itemChild:SetWidth(200)
+		itemChild:SetHeight(280)
+		itemChild:SetBackdrop(backdropInfo)
+		local rightTopItemFrame = CreateFrame("Frame", "RightTopItemFrame"..i, itemChild)
+		rightTopItemFrame:SetPoint("TOPRIGHT", -4, -5)
+		rightTopItemFrame:SetSize(46, 225)
+		local rightTopTexture = rightTopItemFrame:CreateTexture()
+		rightTopTexture:SetTexture(DressUpTexturePath().."2")
+		rightTopTexture:SetAllPoints()
+		local rightBottomItemFrame = CreateFrame("Frame", "RightBottomItemFrame"..i, itemChild)
+		rightBottomItemFrame:SetPoint("BOTTOMRIGHT", -4, -30)
+		rightBottomItemFrame:SetSize(46, 85)
+		local rightBottomTexture = rightBottomItemFrame:CreateTexture()
+		rightBottomTexture:SetTexture(DressUpTexturePath().."4")
+		rightBottomTexture:SetAllPoints()
+		local leftTopItemFrame = CreateFrame("Frame", "LeftTopItemFrame"..i, itemChild)
+		leftTopItemFrame:SetPoint("TOPLEFT", 4, -5)
+		leftTopItemFrame:SetSize(146, 225)
+		local leftTopTexture = leftTopItemFrame:CreateTexture()
+		leftTopTexture:SetTexture(DressUpTexturePath().."1")
+		leftTopTexture:SetAllPoints()
+		local leftBottomItemFrame = CreateFrame("Frame", "LeftBottomItemFrame"..i, itemChild)
+		leftBottomItemFrame:SetPoint("BOTTOMLEFT", 4, -30)
+		leftBottomItemFrame:SetSize(146, 85)
+		local leftBottomTexture = leftBottomItemFrame:CreateTexture()
+		leftBottomTexture:SetTexture(DressUpTexturePath().."3")
+		leftBottomTexture:SetAllPoints()
+		local itemModel = CreateFrame("DressUpModel", "ItemModel"..i, itemChild)
+		itemModel:SetPoint("CENTER", 0, -20)
+		itemModel:SetSize(256, 256)
+		itemModel:Hide()
+		-- local itemButtonLeft = CreateFrame("Button", "ItemModel"..i.."RotateLeftButton", ItemModel)
+		-- itemButtonLeft:SetPoint("TOPLEFT", itemChild, "TOPLEFT")
+		-- itemButtonLeft:SetFrameLevel(30)
+		-- itemButtonLeft:SetSize(35, 35)
+		-- itemButtonLeft:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
+		-- itemButtonLeft:SetScript("OnClick", function(self) Model_RotateLeft(self:GetParent()) end)
+		-- itemButtonLeft:SetNormalTexture("Interface\\Buttons\\UI-RotationLeft-Button-Up")
+		-- itemButtonLeft:SetPushedTexture("Interface\\Buttons\\UI-RotationLeft-Button-Down")
+		-- itemButtonLeft:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Round", "ADD")
+		-- local itemButtonRight = CreateFrame("Button", "ItemModel"..i.."RotateRightButton", ItemModel)
+		-- itemButtonRight:SetPoint("TOPLEFT", itemButtonLeft, "TOPRIGHT")
+		-- itemButtonRight:SetFrameLevel(30)
+		-- itemButtonRight:SetSize(35, 35)
+		-- itemButtonRight:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
+		-- itemButtonRight:SetScript("OnClick", function(self) Model_RotateRight(self:GetParent()) end)
+		-- itemButtonRight:SetNormalTexture("Interface\\Buttons\\UI-RotationRight-Button-Up")
+		-- itemButtonRight:SetPushedTexture("Interface\\Buttons\\UI-RotationRight-Button-Down")
+		-- itemButtonRight:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Round", "ADD")
+		local itemButton = CreateFrame("Button", "ItemButton"..i, leftBottomItemFrame, "ItemButtonTemplate")
+		itemButton:SetPoint("BOTTOMLEFT", 5, 40)
+		itemButton:SetScript("OnClick", OnClickItemTransmogButton)
+		itemButton:SetScript("OnEnter", OnEnterItemToolTip)
+		itemButton:SetScript("OnLeave", OnLeaveItemToolTip)
+		itemButton:RegisterForClicks("AnyUp");
+		itemButton:Disable()
+		lastSlot = itemChild
+		itemChild.itemModel = itemModel
+		itemChild.itemButton = itemButton
+		table.insert(itemButtons, itemChild)
 	end
 end
 
@@ -520,12 +595,11 @@ function OnClickPrevPage(btn)
 	AIO.Handle("Transmog", "SetCurrentSlotItemIds", currentSlot, currentPage)
 end
 
-function PaperDollFrame_OnEvent (self, event, ...)
+function PaperDollFrame_OnEvent(self, event, ...)
 	local unit = ...;
 	if ( event == "PLAYER_ENTERING_WORLD" or
 		event == "UNIT_MODEL_CHANGED" and unit == "player" ) then
 		PaperDollFrame_SetLevel()
-		CharacterModelFrame:SetUnit("player");
 		CharacterModelFrameFake:SetUnit("player"); -- custom code
 		return;
 	elseif ( event == "VARIABLES_LOADED" ) then
@@ -569,73 +643,11 @@ function PaperDollFrame_OnEvent (self, event, ...)
 	end
 end
 
-function PaperDollFrame_SetBackground()
-	local texture = GetDressUpTexturePath("player")
-	local overlayAlpha = GetDressUpTextureAlpha("player")
-
-	local topLeft = CharacterModelFrameBackgroundTopLeft
-	local topRight = CharacterModelFrameBackgroundTopRight
-	local bottomLeft = CharacterModelFrameBackgroundBotLeft
-	local bottomRight = CharacterModelFrameBackgroundBotRight
-	
-	local topLeftFake = CharacterModelFrameBackgroundTopLeftFake
-	local topRightFake = CharacterModelFrameBackgroundTopRightFake
-	local bottomLeftFake = CharacterModelFrameBackgroundBotLeftFake
-	local bottomRightFake = CharacterModelFrameBackgroundBotRightFake
-
-
-	topLeft:SetTexture(texture..1)
-	topRight:SetTexture(texture..2)
-	bottomLeft:SetTexture(texture..3)
-	bottomRight:SetTexture(texture..4)
-	
-	topLeftFake:SetTexture(texture..1) -- custom code
-	topRightFake:SetTexture(texture..2)
-	bottomLeftFake:SetTexture(texture..3)
-	bottomRightFake:SetTexture(texture..4)
-
-
-	topLeft:SetDesaturated(true)
-	topRight:SetDesaturated(true)
-	bottomLeft:SetDesaturated(true)
-	bottomRight:SetDesaturated(true)
-	
-	topLeftFake:SetDesaturated(true) -- custom code
-	topRightFake:SetDesaturated(true)
-	bottomLeftFake:SetDesaturated(true)
-	bottomRightFake:SetDesaturated(true)
-
-
-	CharacterModelFrameBackgroundOverlay:SetAlpha(overlayAlpha)
-	
-	CharacterModelFrameBackgroundOverlayFake:SetAlpha(overlayAlpha)
-end
-
-function PaperDollItemSlotButton_Update (self)
+function PaperDollItemSlotButton_Update(self)
 	local textureName = GetInventoryItemTexture("player", self:GetID());
 	local cooldown = _G[self:GetName().."Cooldown"];
-
-	local link = GetInventoryItemLink("player", self:GetID())
-	if link then
-		local itemName, _, _, _, _, _, _, _, _, originalTexture = GetItemInfo(link)
-	end
-
-	local parent = self:GetParent();
-	if parent and parent:GetParent() then
-		if not parent:GetParent().equipmentItemsList then
-			parent:GetParent().equipmentItemsList = {};
-		end
-
-		parent:GetParent().equipmentItemsList[self:GetID()] = itemName;
-	end
-
 	if ( textureName ) then
-		if link and self:GetID() < 20 then
-			local _, _, quality = GetItemInfo(link)
-			SetItemButtonQuality(self, quality)
-		end
-
-		SetItemButtonTexture(self, originalTexture or textureName);
+		SetItemButtonTexture(self, textureName);
 		SetItemButtonCount(self, GetInventoryItemCount("player", self:GetID()));
 		if ( GetInventoryItemBroken("player", self:GetID()) ) then
 			SetItemButtonTextureVertexColor(self, 0.9, 0, 0);
@@ -649,16 +661,12 @@ function PaperDollItemSlotButton_Update (self)
 			CooldownFrame_SetTimer(cooldown, start, duration, enable);
 		end
 		self.hasItem = 1;
-		self.containerID = self:GetID()
 	else
-		if self.IconBorder and self.IconBorder:IsShown() then
-			self.IconBorder:Hide()
-		end
 		local textureName = self.backgroundTextureName;
 		if ( self.checkRelic and UnitHasRelicSlot("player") ) then
 			textureName = "Interface\\Paperdoll\\UI-PaperDoll-Slot-Relic.blp";
 		end
-		SetItemButtonTexture(self, textureName); --custom code?
+		SetItemButtonTexture(self, textureName);
 		SetItemButtonCount(self, 0);
 		SetItemButtonTextureVertexColor(self, 1.0, 1.0, 1.0);
 		SetItemButtonNormalTextureVertexColor(self, 1.0, 1.0, 1.0);
@@ -668,44 +676,12 @@ function PaperDollItemSlotButton_Update (self)
 		self.hasItem = nil;
 	end
 
-	-- TODO - Check if disabled transmog later
-	if ( TransmogFrame:IsShown() ) then
-		if ( self:GetName() == "CharacterHeadSlot" ) then
-			textureName = GetItemIcon(currentHeadTransmogId)
-		elseif ( self:GetName()  == "CharacterShoulderSlot" ) then
-			textureName = GetItemIcon(currentShoulderTransmogId)
-		elseif ( self:GetName()  == "CharacterShirtSlot" ) then
-			textureName = GetItemIcon(currentShirtTransmogId)
-		elseif ( self:GetName()  == "CharacterChestSlot" ) then
-			textureName = GetItemIcon(currentChestTransmogId)
-		elseif ( self:GetName()  == "CharacterWaistSlot" ) then
-			textureName = GetItemIcon(currentWaistTransmogId)
-		elseif ( self:GetName()  == "CharacterLegsSlot" ) then
-			textureName = GetItemIcon(currentLegsTransmogId)
-		elseif ( self:GetName()  == "CharacterFeetSlot" ) then
-			textureName = GetItemIcon(currentFeetTransmogId)
-		elseif ( self:GetName()  == "CharacterWristSlot" ) then
-			textureName = GetItemIcon(currentWristTransmogId)
-		elseif ( self:GetName()  == "CharacterHandsSlot" ) then
-			textureName = GetItemIcon(currentHandsTransmogId)
-		elseif ( self:GetName()  == "CharacterBackSlot" ) then
-			textureName = GetItemIcon(currentBackTransmogId)
-		elseif ( self:GetName()  == "CharacterMainHandSlot" ) then
-			textureName = GetItemIcon(currentMainHandTransmogId)
-		elseif ( self:GetName()  == "CharacterSecondaryHandSlot" ) then
-			textureName = GetItemIcon(currentOffHandTransmogId)
-		elseif ( self:GetName()  == "CharacterRangedSlot" ) then
-			textureName = GetItemIcon(currentRangedTransmogId)
-		elseif ( self:GetName()  == "CharacterTabardSlot" ) then
-			textureName = GetItemIcon(currentTabardTransmogId)
-		end
-		SetItemButtonTexture(self, textureName)
-	end
-
-	if ( PaperDollEquipmentManagerPane and not PaperDollEquipmentManagerPane:IsShown() ) then
+	SetCharacterFrameTransmogItemButtonTextures()
+	
+	if ( not GearManagerDialog:IsShown() ) then
 		self.ignored = nil;
 	end
-
+	
 	if ( self.ignored and self.ignoreTexture ) then
 		self.ignoreTexture:Show();
 	elseif ( self.ignoreTexture ) then
@@ -715,33 +691,8 @@ function PaperDollItemSlotButton_Update (self)
 	PaperDollItemSlotButton_UpdateLock(self);
 
 	-- Update repair all button status
-	if MerchantFrame_UpdateGuildBankRepair then
-		MerchantFrame_UpdateGuildBankRepair();
-	end
-
-	if MerchantFrame_UpdateCanRepairAll then
-		MerchantFrame_UpdateCanRepairAll();
-	end
-end
-
-function LoadTransmogsFromCurrentIds()
-	CharacterModelFrame:SetUnit("player")
-	CharacterModelFrame:Undress()
-	if ( currentHeadTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentHeadTransmogId) end
-	if ( currentShoudlerTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentShoudlerTransmogId) end
-	if ( currentShirtTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentShirtTransmogId) end
-	if ( currentChestTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentChestTransmogId) end
-	if ( currentWaistTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentWaistTransmogId) end
-	if ( currentLegsTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentLegsTransmogId) end
-	if ( currentFeetTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentFeetTransmogId) end
-	if ( currentWristTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentWristTransmogId) end
-	if ( currentHandsTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentHandsTransmogId) end
-	if ( currentBackTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentBackTransmogId) end
-	--if ( currentMainHandTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentMainHandTransmogId, "MAINHANDSLOT") end
-	--if ( currentOffHandTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentOffHandTransmogId, "SECONDARYHANDSLOT") end
-	--if ( currentRangedTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentRangedTransmogId) end
-	if ( currentTabardTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentTabardTransmogId) end
-	SetCharacterFrameTransmogItemButtonTextures()
+	MerchantFrame_UpdateGuildBankRepair();
+	MerchantFrame_UpdateCanRepairAll();
 end
 
 function OnClickResetCurrentTransmogSlot(btn)
@@ -821,16 +772,6 @@ local function TransmogTabTooltip(btn)
 	GameTooltip:Show()
 end
 
-local function OnEventCharacterDressUpModel(self, event, ...)
-	SetCharacterFrameTransmogItemButtonTextures()
-end
-
-local function OnEventShowCharacterDressUpModel()
-	if ( TransmogFrame:IsShown() ) then
-		LoadTransmogsFromCurrentIds()
-	end
-end
-
 function TransmogHandlers.InitTab(player, newSlotItemIds, page, hasMorePages)
 	currentSlotItemIds = newSlotItemIds
 	TransmogPaginationText:SetText("Page "..page)
@@ -853,11 +794,12 @@ function TransmogHandlers.InitTab(player, newSlotItemIds, page, hasMorePages)
 			child.itemButton:SetID(0)
 			child.itemButton:Disable()
 			child.itemModel:Hide()
-			SetItemButtonTexture(child.itemButton, EmptyEquipmentIconBackgroundPath..EquipmentIconTypes[Transmog_CalculateSlotReverse(currentSlot)])
+		    SetItemButtonTexture(child.itemButton, EmptyEquipmentIconBackgroundPath..EquipmentIconTypes[Transmog_CalculateSlotReverse(currentSlot)])
 		else
 			child:SetID(currentSlotItemIds[i])
 			child.itemButton:SetID(currentSlotItemIds[i])
-			SetItemButtonTexture(child.itemButton, GetItemIcon(currentSlotItemIds[i]))
+			local textureName = GetItemIcon(currentSlotItemIds[i])
+			SetItemButtonTexture(child.itemButton, textureName)
 			child.itemButton:Enable()
 			child.itemModel:Show()
 			child.itemModel:SetUnit("player")
@@ -1080,7 +1022,7 @@ function TransmogHandlers.SetTransmogItemIdClient(player, slot, id, realItemId)
 			CharacterModelFrame:TryOn(realItemId)
 		end
 	end
-	SetCharacterFrameTransmogItemButtonTextures()
+	ResetCharacterFrameTransmogItemButtonTextures()
 end
 
 local function OnClickHeadTab(btn)
@@ -1172,16 +1114,15 @@ local function OnEventEnterWorldReloadTransmogIds(self, event)
 		AIO.Handle("Transmog", "SetTransmogItemIds")
 	else
 		AIO.Handle("Transmog", "OnUnequipItem")
+		ResetCharacterFrameTransmogItemButtonTextures()
+		if ( TransmogFrame:IsShown() ) then
+			LoadTransmogsFromCurrentIds()
+		end
 	end
 end
 
 function OnTransmogFrameLoad(self)
 	-- get transmog ids and cache them on client
-	CharacterModelFrame:Hide()
-	CharacterModelFrame:SetUnit("player")
-	CharacterModelFrameFake:Show()
-	CharacterModelFrameFake:SetUnit("player")
-
 	ItemSearchInput:SetText("|cff808080Click here and start typing...|r")
 	ItemSearchInput:SetScript("OnEnterPressed", SetSearchTab)
 	
@@ -1295,7 +1236,7 @@ function OnTransmogFrameLoad(self)
 	
 	characterTransmogTab = CreateFrame("CheckButton", "CharacterFrameTab6", CharacterFrame, "SpellBookSkillLineTabTemplate")
 	characterTransmogTab:SetSize(32, 32);
-	characterTransmogTab:SetPoint("TOPRIGHT", CharacterFrame, "TOPRIGHT", 32, -48)
+	characterTransmogTab:SetPoint("TOPRIGHT", CharacterFrame, "TOPRIGHT", 0, -48)
 	characterTransmogTab:Show()
 	innerCharacterTransmogTab = characterTransmogTab:CreateTexture("Item", "ARTWORK")
 	innerCharacterTransmogTab:SetTexture("Interface\\Icons\\INV_Mask_01")
@@ -1305,7 +1246,6 @@ function OnTransmogFrameLoad(self)
 	characterTransmogTab:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square", "ADD")
 	characterTransmogTab:SetScript("OnClick", function(self) if ( TransmogFrame:IsShown() ) then TransmogFrame:Hide() return; end TransmogFrame:Show() end)
 
-	PaperDollFrame:HookScript("OnEvent", OnEventCharacterDressUpModel, LE_SCRIPT_BINDING_TYPE_INTRINSIC_POSTCALL)
 	PaperDollFrame:SetScript("OnShow", PaperDollFrame_OnShow)
 	
 	headTab:SetScript("OnClick", OnClickHeadTab)
@@ -1350,6 +1290,7 @@ function OnClickTransmogButton(self)
 	currentOffHandTransmogId = originalOffHandTransmogId
 	currentRangedTransmogId = originalRangedTransmogId
 	currentTabardTransmogId = originalTabardTransmogId
+	ResetCharacterFrameTransmogItemButtonTextures()
 	CharacterModelFrame:Show()
 	CharacterModelFrameFake:Hide()
 	currentSlot = PLAYER_VISIBLE_ITEM_1_ENTRYID
@@ -1357,29 +1298,9 @@ function OnClickTransmogButton(self)
 	PanelTemplates_SelectTab(headTab)
 	characterTransmogTab:SetChecked(true)
 	isInputHovered = false
-	--CharacterModelFrame:SetUnit("player")
-	--CharacterModelFrame:Undress()
-	--AIO.Handle("Transmog", "SetTransmogItemIds")
 	AIO.Handle("Transmog", "SetCurrentSlotItemIds", currentSlot, 1)
 	ItemSearchInput:SetText("|cff808080Click here and start typing...|r")
 	LoadTransmogsFromCurrentIds()
-end
-
-local function ResetCharacterFrameTransmogItemButtonTextures()
-	PaperDollItemSlotButton_Update(CharacterHeadSlot)
-	PaperDollItemSlotButton_Update(CharacterShoulderSlot)
-	PaperDollItemSlotButton_Update(CharacterShirtSlot)
-	PaperDollItemSlotButton_Update(CharacterChestSlot)
-	PaperDollItemSlotButton_Update(CharacterWaistSlot)
-	PaperDollItemSlotButton_Update(CharacterLegsSlot)
-	PaperDollItemSlotButton_Update(CharacterFeetSlot)
-	PaperDollItemSlotButton_Update(CharacterWristSlot)
-	PaperDollItemSlotButton_Update(CharacterHandsSlot)
-	PaperDollItemSlotButton_Update(CharacterBackSlot)
-	PaperDollItemSlotButton_Update(CharacterMainHandSlot)
-	PaperDollItemSlotButton_Update(CharacterSecondaryHandSlot)
-	PaperDollItemSlotButton_Update(CharacterRangedSlot)
-	PaperDollItemSlotButton_Update(CharacterTabardSlot)
 end
 
 function OnHideTransmogFrame(self)
@@ -1406,42 +1327,20 @@ function OnHideTransmogFrame(self)
 end
 
 function PaperDollFrame_OnShow(self)
-	--ResetCharacterFrameTransmogItemButtonTextures() -- TODO Item button images and quality is not correct for transmogs !!! Check and repair
-	PaperDollSidebarTab1.Hider:Hide()
-	PaperDollSidebarTab1.Highlights:Hide()
-	PaperDollSidebarTab1.TabBg:SetTexCoord(0.01562500, 0.79687500, 0.78906250, 0.95703125)
-
-	PaperDollSidebarTab2.Hider:Show()
-	PaperDollSidebarTab2.Highlights:Show()
-	PaperDollSidebarTab2.TabBg:SetTexCoord(0.01562500, 0.79687500, 0.61328125, 0.78125000)
+	--PaperDollFrame_SetGuild();
+	PaperDollFrame_SetLevel();
+	PaperDollFrame_SetResistances();
+	PaperDollFrame_UpdateStats();
+	if ( UnitHasRelicSlot("player") ) then
+		CharacterAmmoSlot:Hide();
+	else
+		CharacterAmmoSlot:Show();
+	end
+	if ( not PlayerTitlePickerScrollFrame.titles ) then
+		PlayerTitleFrame_UpdateTitles();	
+	end
 	
-	PaperDollSidebarTab3.Hider:Show()
-	PaperDollSidebarTab3.Highlights:Show()
-	PaperDollSidebarTab3.TabBg:SetTexCoord(0.01562500, 0.79687500, 0.61328125, 0.78125000)
-	
-	PaperDollFrame.NewPanel.ClassBackground:Show()
-
-	CharacterFrameTitleText:SetText(UnitPVPName("player"))
-	PlayerTitleFrame_UpdateTitles()
-	PlayerTitlePickerFrame:Hide()
-	-- CharacterFramePortrait:Hide()
-	-- CharacterFrameCloseButton2:Show()
-	-- PaperDollFrame_SetGuild();
-
-	PaperDollFrame_SetLevel()
-	PaperDollFrame_SetResistances()
-	PaperDollFrame_UpdateStats()
-	PaperDollFrame_SetBackground()
-	
-	PaperDollFrame_CharacterAmmoSlot()
-
-	PaperDollFrame.NewPanel.Stats:Show()
-	PaperDollSidebarTabs:Show()
-
-	ButtonFrameTemplate_HideButtonBar(CharacterFrame);
-	CharacterFrame.Inset:Hide()
-	CharacterFrame_Expand()
-	
+	CharacterModelFrameFake:SetUnit("player")
 	if ( TransmogFrame:IsShown() ) then -- custom code
 		characterTransmogTab:SetChecked(true)
 		CharacterModelFrame:Show()
@@ -1451,11 +1350,8 @@ function PaperDollFrame_OnShow(self)
 		CharacterModelFrame:Hide()
 		CharacterModelFrameFake:Show()
 	end
-	
-	CharacterModelFrame:SetUnit("player")
-	CharacterModelFrameFake:SetUnit("player")
-	
-	--OnEventShowCharacterDressUpModel()
+
+	LoadTransmogsFromCurrentIds()
 	-- end custom code
 end
 

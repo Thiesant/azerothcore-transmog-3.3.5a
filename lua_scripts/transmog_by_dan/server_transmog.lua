@@ -95,12 +95,14 @@ function Transmog_OnEquipItem(event, player, item, bag, slot)
 		
 		CharDBQuery("INSERT INTO character_transmog (`player_guid`, `slot`, `real_item`) VALUES ("..playerGUID..", '"..constSlot.."', "..itemId..") ON DUPLICATE KEY UPDATE real_item = VALUES(real_item);")
 		
-		local transmog = CharDBQuery( "SELECT item FROM character_transmog WHERE player_guid = "..playerGUID.." AND slot = "..constSlot..";")
+		local transmog = CharDBQuery( "SELECT item FROM character_transmog WHERE player_guid = "..playerGUID.." AND slot = "..constSlot.." AND item IS NOT NULL;")
+		print(transmog)
 		if ( transmog == nil ) then
 			return;
 		end
 		local transmogItem = transmog:GetUInt32(0)
-		if ( transmogItem == ( nil or 0 ) ) then
+		local isPlayerInitDone = player:GetUInt32Value(147) -- use unit padding
+		if ( transmogItem == nil or ( transmogItem == 0 and isPlayerInitDone ~= 1 ) ) then
 			return;
 		end
 		
@@ -108,8 +110,50 @@ function Transmog_OnEquipItem(event, player, item, bag, slot)
 	end
 end
 
+-- Todo add lua/c++ function for unequip!!
+function TransmogHandlers.OnUnequipItem(player)
+	local playerGUID = player:GetGUIDLow()
+
+	local transmogs = CharDBQuery( 'SELECT item, real_item, slot FROM character_transmog WHERE player_guid = '..playerGUID..' AND item IS NOT NULL;') -- AND slot NOT IN ("313", "315", "317")
+	if ( transmogs == nil ) then
+		return;
+	end
+	
+	for i = 1, transmogs:GetRowCount(), 1 do
+		local currentRow = transmogs:GetRow()
+		local item = currentRow["item"]
+		local slot = currentRow["slot"]
+		local real_item = currentRow["real_item"]
+		local validSlotItem = player:GetUInt32Value(tonumber(slot))
+		if ( validSlotItem == 0 ) then
+			CharDBQuery("INSERT INTO character_transmog (`player_guid`, `slot`, `item`, `real_item`) VALUES ("..playerGUID..", '"..slot.."', "..item..", 0) ON DUPLICATE KEY UPDATE item = VALUES(item), real_item = VALUES(real_item);")
+			player:SetUInt32Value(slot, item)
+		end
+		transmogs:NextRow()
+	end
+
+
+
+	local accountGUID = player:GetAccountId()
+	local playerGUID = player:GetGUIDLow()
+		
+	local transmog = CharDBQuery( "SELECT item FROM character_transmog WHERE player_guid = "..playerGUID.." AND item IS NOT NULL;")
+	print(transmog)
+	if ( transmog == nil ) then
+		return;
+	end
+	local transmogItem = transmog:GetUInt32(0)
+	local isPlayerInitDone = player:GetUInt32Value(147) -- use unit padding
+	if ( transmogItem == nil or ( transmogItem == 0 and isPlayerInitDone ~= 1 ) ) then
+		return;
+	end
+	
+	player:SetUInt32Value(constSlot, transmogItem)
+end
+
 function Transmog_Load(player)
 	local playerGUID = player:GetGUIDLow()
+	print(playerGUID)
 	
 	local transmogs = CharDBQuery( "SELECT item, slot FROM character_transmog WHERE player_guid = "..playerGUID..";")
 	if ( transmogs == nil ) then
@@ -120,7 +164,7 @@ function Transmog_Load(player)
 		local currentRow = transmogs:GetRow()
 		local slot = currentRow["slot"]
 		local item = currentRow["item"]
-		if ( item ~= nil and item ~= '' and item ~= 0 ) then
+		if ( item ~= nil and item ~= '' ) then
 			player:SetUInt32Value(tonumber(slot), item)
 		end
 		transmogs:NextRow()
@@ -129,7 +173,14 @@ end
 
 function Transmog_OnLogin(event, player)
 	-- Apply transmog on login
+	-- Transmog_Load(player)
+	--local item = player:GetEquippedItemBySlot(4)
+	--print(item:GetName())
+end
+
+function TransmogHandlers.LoadPlayer(player)
 	Transmog_Load(player)
+	player:SetUInt32Value(147, 1) -- use unit padding
 end
 
 function TransmogHandlers.EquipTransmogItem(player, item, slot)
@@ -137,6 +188,20 @@ function TransmogHandlers.EquipTransmogItem(player, item, slot)
 	
 	CharDBQuery("INSERT INTO character_transmog (`player_guid`, `slot`, `item`) VALUES ("..playerGUID..", '"..slot.."', "..item..") ON DUPLICATE KEY UPDATE item = VALUES(item);")
 	player:SetUInt32Value(tonumber(slot), item)
+	--AIO.Handle(player, "Transmog", "LoadTransmogsAfterSave")
+end
+
+function TransmogHandlers.EquipAllTransmogItems(player, transmogPreview)
+	if ( transmogPreview == {} ) then
+		return;
+	end
+	
+	local playerGUID = player:GetGUIDLow()
+	
+	for slot, item in ipairs(transmogPreview) do
+		player:SetUInt32Value(tonumber(slot), item)
+		CharDBQuery("INSERT INTO character_transmog (`player_guid`, `slot`, `item`) VALUES ("..playerGUID..", '"..slot.."', "..item..") ON DUPLICATE KEY UPDATE item = VALUES(item);")
+	end
 end
 
 function TransmogHandlers.UnequipTransmogItem(player, slot)
@@ -145,12 +210,12 @@ function TransmogHandlers.UnequipTransmogItem(player, slot)
 	local oldItem = CharDBQuery( "SELECT real_item FROM character_transmog WHERE player_guid = "..playerGUID.." AND slot = "..slot..";")
 	local oldItemId = oldItem:GetUInt32(0)
 	if ( oldItemId == nil or oldItemId == 0) then
-		CharDBQuery("INSERT INTO character_transmog (`player_guid`, `slot`, `item`, `real_item`) VALUES ("..playerGUID..", '"..slot.."', NULL, NULL) ON DUPLICATE KEY UPDATE item = VALUES(item), real_item = VALUES(real_item);")
+		CharDBQuery("INSERT INTO character_transmog (`player_guid`, `slot`, `item`, `real_item`) VALUES ("..playerGUID..", '"..slot.."', 0, 0) ON DUPLICATE KEY UPDATE item = VALUES(item), real_item = VALUES(real_item);")
 		player:SetUInt32Value(tonumber(slot), 0)
 		return;
 	end
 	
-	CharDBQuery("INSERT INTO character_transmog (`player_guid`, `slot`, `item`, `real_item`) VALUES ("..playerGUID..", '"..slot.."', NULL, '"..oldItemId.."') ON DUPLICATE KEY UPDATE item = VALUES(item), real_item = VALUES(real_item);")
+	CharDBQuery("INSERT INTO character_transmog (`player_guid`, `slot`, `item`, `real_item`) VALUES ("..playerGUID..", '"..slot.."', 0, '"..oldItemId.."') ON DUPLICATE KEY UPDATE item = VALUES(item), real_item = VALUES(real_item);")
 	player:SetUInt32Value(tonumber(slot), oldItemId)
 end
 
@@ -173,6 +238,32 @@ end
 
 function TransmogHandlers.Print(player, ...)
     print(...)
+end
+
+function TransmogHandlers.SetTransmogItemIds(player)
+	local playerGUID = player:GetGUIDLow()
+	
+	local transmogs = CharDBQuery( 'SELECT item, real_item, slot FROM character_transmog WHERE player_guid = '..playerGUID..';') -- AND slot NOT IN ("313", "315", "317")
+	if ( transmogs == nil ) then
+		return;
+	end
+	
+	for i = 1, transmogs:GetRowCount(), 1 do
+		local currentRow = transmogs:GetRow()
+		local item = currentRow["item"]
+		local slot = currentRow["slot"]
+		local real_item = currentRow["real_item"]
+		local validSlotItem = player:GetUInt32Value(tonumber(slot))
+		if ( validSlotItem == 0 ) then
+			CharDBQuery("INSERT INTO character_transmog (`player_guid`, `slot`, `item`, `real_item`) VALUES ("..playerGUID..", '"..slot.."', 0, 0) ON DUPLICATE KEY UPDATE item = VALUES(item), real_item = VALUES(real_item);")
+		end
+		if (  not item or item == 0 and real_item ~= nil and real_item ~= 0 and ( validSlotItem ~= 0 or not validSlotItem )) then
+			AIO.Handle(player, "Transmog", "SetTransmogItemIdClient", slot, 0, real_item)
+		else
+			AIO.Handle(player, "Transmog", "SetTransmogItemIdClient", slot, item, real_item)
+		end
+		transmogs:NextRow()
+	end
 end
 
 function TransmogHandlers.SetCurrentSlotItemIds(player, slot, page)

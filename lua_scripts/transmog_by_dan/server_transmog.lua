@@ -101,7 +101,7 @@ function Transmog_OnEquipItem(event, player, item, bag, slot)
 			return;
 		end
 		local transmogItem = transmog:GetUInt32(0)
-		local isPlayerInitDone = player:GetUInt32Value(147) -- use unit padding
+		local isPlayerInitDone = player:GetUInt32Value(147) -- Use unit padding
 		if ( transmogItem == nil or ( transmogItem == 0 and isPlayerInitDone ~= 1 ) ) then
 			return;
 		end
@@ -236,18 +236,6 @@ function TransmogHandlers.displayTransmog(player, spellid)
 	return false
 end
 
-local function Transmog_OnGossipHello(event, player, object)
-	inCombat = player:IsInCombat()
-	
-	if ( inCombat == false ) then
-		AIO.Handle(player, "Transmog", "TransmogFrame")
-		return false
-	else
-		player:SendBroadcastMessage("You can not use this NPC in combat.")
-		return;
-	end
-end
-
 function TransmogHandlers.Print(player, ...)
     print(...)
 end
@@ -279,143 +267,146 @@ function TransmogHandlers.SetTransmogItemIds(player)
 end
 
 function TransmogHandlers.SetCurrentSlotItemIds(player, slot, page)
-	local accountGUID = player:GetAccountId()
-	local pageOffset = 0
-	local inventoryTypes = ""
-	
-	if ( slot == PLAYER_VISIBLE_ITEM_1_ENTRYID ) then
-		inventoryTypes = "= 1"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_3_ENTRYID ) then
-		inventoryTypes = "= 3"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_4_ENTRYID ) then
-		inventoryTypes = "= 4"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_5_ENTRYID ) then
-		inventoryTypes = "IN (5, 20)"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_6_ENTRYID ) then
-		inventoryTypes = "= 6"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_7_ENTRYID ) then
-		inventoryTypes = "= 7"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_8_ENTRYID ) then
-		inventoryTypes = "= 8"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_9_ENTRYID ) then
-		inventoryTypes = "= 9"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_10_ENTRYID ) then
-		inventoryTypes = "= 10"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_15_ENTRYID ) then
-		inventoryTypes = "= 16"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_16_ENTRYID ) then
-		inventoryTypes = "IN (13, 17, 21)"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_17_ENTRYID ) then
-		inventoryTypes = "IN (13, 17, 22, 23, 14)"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_18_ENTRYID ) then
-		inventoryTypes = "IN (15, 25, 26)"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_19_ENTRYID ) then
-		inventoryTypes = "= 19"
+    -- Get the account ID
+    local accountGUID = player:GetAccountId()
+
+    -- Define inventory type mapping
+    local inventoryTypesMapping = {
+        [PLAYER_VISIBLE_ITEM_1_ENTRYID] = "= 1",
+        [PLAYER_VISIBLE_ITEM_3_ENTRYID] = "= 3",
+        [PLAYER_VISIBLE_ITEM_4_ENTRYID] = "= 4",
+        [PLAYER_VISIBLE_ITEM_5_ENTRYID] = "IN (5, 20)",
+        [PLAYER_VISIBLE_ITEM_6_ENTRYID] = "= 6",
+        [PLAYER_VISIBLE_ITEM_7_ENTRYID] = "= 7",
+        [PLAYER_VISIBLE_ITEM_8_ENTRYID] = "= 8",
+        [PLAYER_VISIBLE_ITEM_9_ENTRYID] = "= 9",
+        [PLAYER_VISIBLE_ITEM_10_ENTRYID] = "= 10",
+        [PLAYER_VISIBLE_ITEM_15_ENTRYID] = "= 16",
+        [PLAYER_VISIBLE_ITEM_16_ENTRYID] = "IN (13, 17, 21)",
+        [PLAYER_VISIBLE_ITEM_17_ENTRYID] = "IN (13, 17, 22, 23, 14)",
+        [PLAYER_VISIBLE_ITEM_18_ENTRYID] = "IN (15, 25, 26)",
+        [PLAYER_VISIBLE_ITEM_19_ENTRYID] = "= 19"
+    }
+
+	-- Get the inventory type for the given slot
+	local inventoryTypes = inventoryTypesMapping[slot]
+	if not inventoryTypes then
+		return -- Slot not valid, exit early
 	end
-	
-	if ( page ~= 1 ) then
-		pageOffset = SLOTS * ( page - 1 )
-	end
-	
-	local transmogs = AuthDBQuery( "SELECT COUNT(unlocked_item_id) FROM account_transmog WHERE account_id = "..accountGUID.." AND inventory_type "..inventoryTypes..";")
-	if ( transmogs == nil ) then
-		AIO.Handle(player, "Transmog", "InitTab", {}, page, false)
-		return;
-	end
-	
-	hasMorePages = false
-	if ( transmogs:GetUInt32(0) ~= 0 and page < ( transmogs:GetUInt32(0) / SLOTS ) ) then
-		hasMorePages = true
-	end
-	
-	local transmogs = AuthDBQuery( "SELECT unlocked_item_id FROM account_transmog WHERE account_id = "..accountGUID.." AND inventory_type "..inventoryTypes.." LIMIT "..SLOTS.." OFFSET "..pageOffset..";")
-	if ( transmogs == nil ) then
-		AIO.Handle(player, "Transmog", "InitTab", {}, page, false)
-		return;
-	end
-	
-	local currentSlotItemIds = {}
-	for i = 1, transmogs:GetRowCount(), 1 do
-		local currentRow = transmogs:GetRow()
-		local item = currentRow["unlocked_item_id"]
-		table.insert(currentSlotItemIds, item)
-		transmogs:NextRow()
-	end
-	
+
+    -- Calculate page offset for pagination
+    local pageOffset = (page > 1) and (SLOTS * (page - 1)) or 0
+
+    -- Query to count matching transmogs
+    local countQuery = string.format(
+        "SELECT COUNT(unlocked_item_id) FROM account_transmog WHERE account_id = %d AND inventory_type %s;",
+        accountGUID, inventoryTypes
+    )
+    local countResult = AuthDBQuery(countQuery)
+    if not countResult then
+        AIO.Handle(player, "Transmog", "InitTab", {}, page, false)
+        return
+    end
+
+    -- Get the total number of transmogs
+    local totalTransmogs = countResult:GetUInt32(0)
+    local hasMorePages = (totalTransmogs > SLOTS * page)
+
+    -- Query to retrieve transmogs for the current page
+    local transmogQuery = string.format(
+        "SELECT unlocked_item_id FROM account_transmog WHERE account_id = %d AND inventory_type %s LIMIT %d OFFSET %d;",
+        accountGUID, inventoryTypes, SLOTS, pageOffset
+    )
+    local transmogs = AuthDBQuery(transmogQuery)
+    if not transmogs then
+        AIO.Handle(player, "Transmog", "InitTab", {}, page, false)
+        return
+    end
+
+    -- Collect the unlocked item IDs
+    local currentSlotItemIds = {}
+    for i = 1, transmogs:GetRowCount() do
+        local currentRow = transmogs:GetRow()
+        local item = currentRow["unlocked_item_id"]
+        table.insert(currentSlotItemIds, item)
+        transmogs:NextRow()
+    end
+
+    -- Return the result to the player
     AIO.Handle(player, "Transmog", "InitTab", currentSlotItemIds, page, hasMorePages)
 end
 
 function TransmogHandlers.SetSearchCurrentSlotItemIds(player, slot, page, search)
-	local accountGUID = player:GetAccountId()
+	-- Ensure search is not empty or nil
 	if ( search == nil or serach == '' ) then
 		return;
 	end
-	search = search:gsub("'", "%%")
-	search = search:gsub("`", "%%")
-	search = search:gsub("\"", "%%")
-	search = search:gsub("&", "%%")
-	local pageOffset = 0
-	local inventoryTypes = ""
-	
-	if ( slot == PLAYER_VISIBLE_ITEM_1_ENTRYID ) then
-		inventoryTypes = "= 1"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_3_ENTRYID ) then
-		inventoryTypes = "= 3"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_4_ENTRYID ) then
-		inventoryTypes = "= 4"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_5_ENTRYID ) then
-		inventoryTypes = "IN (5, 20)"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_6_ENTRYID ) then
-		inventoryTypes = "= 6"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_7_ENTRYID ) then
-		inventoryTypes = "= 7"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_8_ENTRYID ) then
-		inventoryTypes = "= 8"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_9_ENTRYID ) then
-		inventoryTypes = "= 9"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_10_ENTRYID ) then
-		inventoryTypes = "= 10"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_15_ENTRYID ) then
-		inventoryTypes = "= 16"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_16_ENTRYID ) then
-		inventoryTypes = "IN (13, 17, 21)"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_17_ENTRYID ) then
-		inventoryTypes = "IN (13, 17, 22, 23, 14)"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_18_ENTRYID ) then
-		inventoryTypes = "IN (15, 25, 26)"
-	elseif ( slot == PLAYER_VISIBLE_ITEM_19_ENTRYID ) then
-		inventoryTypes = "= 19"
+
+	-- Escape special characters in search string
+	search = search:gsub("[%'`&\"]", "%%")
+
+	-- Define slot-to-inventory type mapping
+	local inventoryTypesMapping = {
+		[PLAYER_VISIBLE_ITEM_1_ENTRYID] = "= 1",
+		[PLAYER_VISIBLE_ITEM_3_ENTRYID] = "= 3",
+		[PLAYER_VISIBLE_ITEM_4_ENTRYID] = "= 4",
+		[PLAYER_VISIBLE_ITEM_5_ENTRYID] = "IN (5, 20)",
+		[PLAYER_VISIBLE_ITEM_6_ENTRYID] = "= 6",
+		[PLAYER_VISIBLE_ITEM_7_ENTRYID] = "= 7",
+		[PLAYER_VISIBLE_ITEM_8_ENTRYID] = "= 8",
+		[PLAYER_VISIBLE_ITEM_9_ENTRYID] = "= 9",
+		[PLAYER_VISIBLE_ITEM_10_ENTRYID] = "= 10",
+		[PLAYER_VISIBLE_ITEM_15_ENTRYID] = "= 16",
+		[PLAYER_VISIBLE_ITEM_16_ENTRYID] = "IN (13, 17, 21)",
+		[PLAYER_VISIBLE_ITEM_17_ENTRYID] = "IN (13, 17, 22, 23, 14)",
+		[PLAYER_VISIBLE_ITEM_18_ENTRYID] = "IN (15, 25, 26)",
+		[PLAYER_VISIBLE_ITEM_19_ENTRYID] = "= 19"
+	}
+
+	-- Get inventory type for the given slot
+	local inventoryTypes = inventoryTypesMapping[slot]
+	if not inventoryTypes then
+		return -- Slot not valid
 	end
+
+    -- Calculate page offset
+    local pageOffset = (page > 1) and (SLOTS * (page - 1)) or 0
 	
-	if ( page ~= 1 ) then
-		pageOffset = SLOTS * ( page - 1 )
-	end
-	
-	local transmogs = AuthDBQuery( "SELECT COUNT(unlocked_item_id) FROM account_transmog WHERE account_id = "..accountGUID.." AND inventory_type "..inventoryTypes.." AND (display_id LIKE '%"..search.."%' OR item_name LIKE '%"..search.."%');")
-	if ( transmogs == nil ) then
-		AIO.Handle(player, "Transmog", "InitTab", {}, page, false)
-		return;
-	end
-	
-	hasMorePages = false
-	if ( transmogs:GetUInt32(0) ~= 0 and page < ( transmogs:GetUInt32(0) / SLOTS ) ) then
-		hasMorePages = true
-	end
-	
-	local transmogs = AuthDBQuery( "SELECT unlocked_item_id FROM account_transmog WHERE account_id = "..accountGUID.." AND inventory_type "..inventoryTypes.." AND (display_id LIKE '%"..search.."%' OR item_name LIKE '%"..search.."%') LIMIT "..SLOTS.." OFFSET "..pageOffset..";")
-	if ( transmogs == nil ) then
-		AIO.Handle(player, "Transmog", "InitTab", {}, page, false)
-		return;
-	end
-	
-	local currentSlotItemIds = {}
-	for i = 1, transmogs:GetRowCount(), 1 do
-		local currentRow = transmogs:GetRow()
-		local item = currentRow["unlocked_item_id"]
-		table.insert(currentSlotItemIds, item)
-		transmogs:NextRow()
-	end
-	
+    -- Query to count matching transmogs
+    local countQuery = string.format(
+        "SELECT COUNT(unlocked_item_id) FROM account_transmog WHERE account_id = %d AND inventory_type %s AND (display_id LIKE '%%%s%%' OR item_name LIKE '%%%s%%');", 
+        player:GetAccountId(), inventoryTypes, search, search
+    )
+    local countResult = AuthDBQuery(countQuery)
+    if not countResult then
+        AIO.Handle(player, "Transmog", "InitTab", {}, page, false)
+        return
+    end
+
+    local totalTransmogs = countResult:GetUInt32(0)
+    local hasMorePages = (totalTransmogs > SLOTS * page)
+
+    -- Query to get transmogs
+    local transmogQuery = string.format(
+        "SELECT unlocked_item_id FROM account_transmog WHERE account_id = %d AND inventory_type %s AND (display_id LIKE '%%%s%%' OR item_name LIKE '%%%s%%') LIMIT %d OFFSET %d;", 
+        player:GetAccountId(), inventoryTypes, search, search, SLOTS, pageOffset
+    )
+    local transmogs = AuthDBQuery(transmogQuery)
+    if not transmogs then
+        AIO.Handle(player, "Transmog", "InitTab", {}, page, false)
+        return
+    end
+
+    -- Collect the unlocked item IDs
+    local currentSlotItemIds = {}
+    for i = 1, transmogs:GetRowCount() do
+        local currentRow = transmogs:GetRow()
+        local item = currentRow["unlocked_item_id"]
+        table.insert(currentSlotItemIds, item)
+        transmogs:NextRow()
+    end
+
+    -- Return the result
     AIO.Handle(player, "Transmog", "InitTab", currentSlotItemIds, page, hasMorePages)
 end
 
@@ -441,7 +432,3 @@ RegisterPlayerEvent(53, Transmog_OnLootItem)
 RegisterPlayerEvent(56, Transmog_OnLootItem)
 RegisterPlayerEvent(29, Transmog_OnEquipItem)
 RegisterPlayerEvent(3, Transmog_OnLogin)
-
---RegisterItemEvent(8, Transmog_OnUnequipItem) TODO unequip?!
-
---RegisterCreatureGossipEvent(NPCID, 1, Transmog_OnGossipHello)

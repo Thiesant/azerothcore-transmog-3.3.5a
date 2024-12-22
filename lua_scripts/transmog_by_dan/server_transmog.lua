@@ -187,9 +187,20 @@ end
 function TransmogHandlers.EquipTransmogItem(player, item, slot)
 	local playerGUID = player:GetGUIDLow()
 	
+	if ( item == nil ) then
+		CharDBQuery("INSERT INTO character_transmog (`player_guid`, `slot`, `item`) VALUES ("..playerGUID..", '"..slot.."', NULL) ON DUPLICATE KEY UPDATE item = VALUES(item);")
+		local oldItem = CharDBQuery( "SELECT real_item FROM character_transmog WHERE player_guid = "..playerGUID.." AND slot = "..slot..";")
+		local oldItemId = oldItem:GetUInt32(0)
+		if ( oldItemId == nil or oldItemId == 0) then
+			player:SetUInt32Value(tonumber(slot), 0)
+			return
+		end
+		player:SetUInt32Value(tonumber(slot), oldItemId)
+		return
+	end
+	
 	CharDBQuery("INSERT INTO character_transmog (`player_guid`, `slot`, `item`) VALUES ("..playerGUID..", '"..slot.."', "..item..") ON DUPLICATE KEY UPDATE item = VALUES(item);")
 	player:SetUInt32Value(tonumber(slot), item)
-	--AIO.Handle(player, "Transmog", "LoadTransmogsAfterSave")
 end
 
 function TransmogHandlers.EquipAllTransmogItems(player, transmogPreview)

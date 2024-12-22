@@ -82,6 +82,24 @@
 					<OnClick function="OnClickResetAllButton"/>
 				</Scripts>
 			</Button>
+			<Button name="DeleteButton" text="Delete Slot" inherits="UIPanelButtonTemplate" >
+				<Size x="100" y="30"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="ResetAllButton" x="55" y="-37"/>
+				</Anchors>
+				<Scripts>
+					<OnClick function="OnClickDeleteCurrentTransmogSlot"/>
+				</Scripts>
+			</Button>
+			<Button name="DeleteAllButton" text="Delete All" inherits="UIPanelButtonTemplate" >
+				<Size x="100" y="30"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="DeleteButton" x="110" y="0"/>
+				</Anchors>
+				<Scripts>
+					<OnClick function="OnClickDeleteAllButton"/>
+				</Scripts>
+			</Button>
 			<Button name="LeftButton" text="d" inherits="UIPanelButtonTemplate">
 				<Size x="40" y="30"/>
 				<NormalFont style="Arrows"/>

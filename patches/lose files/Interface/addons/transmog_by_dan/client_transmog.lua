@@ -11,78 +11,48 @@ local function OnEvent(self, event)
 	AIO.Handle("Transmog", "LoadPlayer")
 end
 
--- TODO set equipment button textures to equipped transmog (For empty an emptry transmog icon placeholder) and revert when closing or reopening! AFter that edit GameTooltip nad make it custom if no item is equipped and transmog window on
-
 local f = CreateFrame("Frame")
 f:RegisterEvent("PLAYER_ENTERING_WORLD")
 f:SetScript("OnEvent", OnEvent)
 
 local CALC = 281
 
-local PLAYER_VISIBLE_ITEM_1_ENTRYID  = 283
-local PLAYER_VISIBLE_ITEM_3_ENTRYID  = 287
-local PLAYER_VISIBLE_ITEM_4_ENTRYID  = 289
-local PLAYER_VISIBLE_ITEM_5_ENTRYID  = 291
-local PLAYER_VISIBLE_ITEM_6_ENTRYID  = 293
-local PLAYER_VISIBLE_ITEM_7_ENTRYID  = 295
-local PLAYER_VISIBLE_ITEM_8_ENTRYID  = 297
-local PLAYER_VISIBLE_ITEM_9_ENTRYID  = 299
-local PLAYER_VISIBLE_ITEM_10_ENTRYID  = 301
-local PLAYER_VISIBLE_ITEM_15_ENTRYID  = 311
-local PLAYER_VISIBLE_ITEM_16_ENTRYID  = 313
-local PLAYER_VISIBLE_ITEM_17_ENTRYID  = 315
-local PLAYER_VISIBLE_ITEM_18_ENTRYID  = 317
-local PLAYER_VISIBLE_ITEM_19_ENTRYID  = 319
+PLAYER_VISIBLE_ITEM_1_ENTRYID  = 283
+PLAYER_VISIBLE_ITEM_3_ENTRYID  = 287
+PLAYER_VISIBLE_ITEM_4_ENTRYID  = 289
+PLAYER_VISIBLE_ITEM_5_ENTRYID  = 291
+PLAYER_VISIBLE_ITEM_6_ENTRYID  = 293
+PLAYER_VISIBLE_ITEM_7_ENTRYID  = 295
+PLAYER_VISIBLE_ITEM_8_ENTRYID  = 297
+PLAYER_VISIBLE_ITEM_9_ENTRYID  = 299
+PLAYER_VISIBLE_ITEM_10_ENTRYID  = 301
+PLAYER_VISIBLE_ITEM_15_ENTRYID  = 311
+PLAYER_VISIBLE_ITEM_16_ENTRYID  = 313
+PLAYER_VISIBLE_ITEM_17_ENTRYID  = 315
+PLAYER_VISIBLE_ITEM_18_ENTRYID  = 317
+PLAYER_VISIBLE_ITEM_19_ENTRYID  = 319
 
-local EmptyEquipmentIconBackgroundPath = "Interface\\paperdoll\\UI-PaperDoll-Slot-"
-local EquipmentIconTypes = {"Head", "", "Shoulder", "Shirt", "Chest", "Waist", "Legs", "Feet", "Wrists", "Hands", "", "", "", "", "Back", "MainHand", "SecondaryHand", "Ranged", "Tabard"}
+function Transmog_CalculateSlotReverse(slot)
+	local reverseSlot = (slot - CALC) / 2
+	return reverseSlot;
+end
 
-
-originalHeadTransmogId = originalHeadTransmogId or nil
-originalShoudlerTransmogId = originalShoudlerTransmogId or nil
-originalShirtTransmogId = originalShirtTransmogId or nil
-originalChestTransmogId = originalChestTransmogId or nil
-originalWaistTransmogId = originalWaistTransmogId or nil
-originalLegsTransmogId = originalLegsTransmogId or nil
-originalFeetTransmogId = originalFeetTransmogId or nil
-originalWristTransmogId = originalWristTransmogId or nil
-originalHandsTransmogId = originalHandsTransmogId or nil
-originalBackTransmogId = originalBackTransmogId or nil
-originalMainHandTransmogId = originalMainHandTransmogId or nil
-originalOffHandTransmogId = originalOffHandTransmogId or nil
-originalRangedTransmogId = originalRangedTransmogId or nil
-originalTabardTransmogId = originalTabardTransmogId or nil
-
-AIO.AddSavedVarChar("originalHeadTransmogId")
-AIO.AddSavedVarChar("originalShoudlerTransmogId")
-AIO.AddSavedVarChar("originalShirtTransmogId")
-AIO.AddSavedVarChar("originalChestTransmogId")
-AIO.AddSavedVarChar("originalWaistTransmogId")
-AIO.AddSavedVarChar("originalLegsTransmogId")
-AIO.AddSavedVarChar("originalFeetTransmogId")
-AIO.AddSavedVarChar("originalWristTransmogId")
-AIO.AddSavedVarChar("originalHandsTransmogId")
-AIO.AddSavedVarChar("originalBackTransmogId")
-AIO.AddSavedVarChar("originalMainHandTransmogId")
-AIO.AddSavedVarChar("originalOffHandTransmogId")
-AIO.AddSavedVarChar("originalRangedTransmogId")
-AIO.AddSavedVarChar("originalTabardTransmogId")
-
-currentHeadTransmogId =  originalHeadTransmogId
-currentShoudlerTransmogId = originalShoudlerTransmogId
-currentShirtTransmogId = originalShirtTransmogId
-currentChestTransmogId = originalChestTransmogId
-currentWaistTransmogId = originalWaistTransmogId
-currentLegsTransmogId = originalLegsTransmogId
-currentFeetTransmogId = originalFeetTransmogId
-currentWristTransmogId = originalWristTransmogId
-currentHandsTransmogId = originalHandsTransmogId 
-currentBackTransmogId = originalBackTransmogId
-currentMainHandTransmogId = originalMainHandTransmogId
-currentOffHandTransmogId = originalOffHandTransmogId
-currentRangedTransmogId = originalRangedTransmogId
-currentTabardTransmogId = originalTabardTransmogId
-
+local SLOT_IDS = {
+    Head = PLAYER_VISIBLE_ITEM_1_ENTRYID,
+    Shoulder = PLAYER_VISIBLE_ITEM_3_ENTRYID,
+    Shirt = PLAYER_VISIBLE_ITEM_4_ENTRYID,
+    Chest = PLAYER_VISIBLE_ITEM_5_ENTRYID,
+    Waist = PLAYER_VISIBLE_ITEM_6_ENTRYID,
+    Legs = PLAYER_VISIBLE_ITEM_7_ENTRYID,
+    Feet = PLAYER_VISIBLE_ITEM_8_ENTRYID,
+    Wrist = PLAYER_VISIBLE_ITEM_9_ENTRYID,
+    Hands = PLAYER_VISIBLE_ITEM_10_ENTRYID,
+    Back = PLAYER_VISIBLE_ITEM_15_ENTRYID,
+    MainHand = PLAYER_VISIBLE_ITEM_16_ENTRYID,
+    SecondaryHand = PLAYER_VISIBLE_ITEM_17_ENTRYID,
+    Ranged = PLAYER_VISIBLE_ITEM_18_ENTRYID,
+    Tabard = PLAYER_VISIBLE_ITEM_19_ENTRYID,
+}
 
 function TableSetHelper(list)
     local set = {}
@@ -90,17 +60,46 @@ function TableSetHelper(list)
     return set
 end
 
-function Transmog_CalculateSlotReverse(slot)
-	local reverseSlot = (slot - CALC) / 2
-	return reverseSlot;
-end
+local EMPTY_TEXTURE = "Interface\\Icons\\INV_Mask_01"
+local EMPTY_EQUIPMENT_ICON_BACKGROUND_PATH = "Interface\\paperdoll\\UI-PaperDoll-Slot-"
+local EQUIPMENT_ICON_TYPES = {"Head", "", "Shoulder", "Shirt", "Chest", "Waist", "Legs", "Feet", "Wrists", "Hands", "", "", "", "", "Chest", "MainHand", "SecondaryHand", "Ranged", "Tabard"}
+-- List of character item frames that will be used
+local EQUIPMENT_SLOT_FRAME_NAMES = {"CharacterHeadSlot", "CharacterShoulderSlot", "CharacterBackSlot", "CharacterChestSlot", "CharacterShirtSlot", "CharacterTabardSlot", "CharacterWristSlot", "CharacterHandsSlot", "CharacterWaistSlot", "CharacterLegsSlot", "CharacterFeetSlot", "CharacterMainHandSlot", "CharacterSecondaryHandSlot", "CharacterRangedSlot"}
+EQUIPMENT_SLOT_FRAME_NAMES = TableSetHelper(EQUIPMENT_SLOT_FRAME_NAMES)
 
-local EquipmentSlotFrameNames = {"CharacterHeadSlot", "CharacterShoulderSlot", "CharacterBackSlot", "CharacterChestSlot", "CharacterShirtSlot", "CharacterTabardSlot", "CharacterWristSlot", "CharacterHandsSlot", "CharacterWaistSlot", "CharacterLegsSlot", "CharacterFeetSlot", "CharacterMainHandSlot", "CharacterSecondaryHandSlot", "CharacterRangedSlot"}
-EquipmentSlotFrameNames = TableSetHelper(EquipmentSlotFrameNames)
+TRANSMOG_SLOT_MAPPING = {
+	[PLAYER_VISIBLE_ITEM_1_ENTRYID] = "Head",
+	[PLAYER_VISIBLE_ITEM_3_ENTRYID] = "Shoulder",
+	[PLAYER_VISIBLE_ITEM_4_ENTRYID] = "Shirt",
+	[PLAYER_VISIBLE_ITEM_5_ENTRYID] = "Chest",
+	[PLAYER_VISIBLE_ITEM_6_ENTRYID] = "Waist",
+	[PLAYER_VISIBLE_ITEM_7_ENTRYID] = "Legs",
+	[PLAYER_VISIBLE_ITEM_8_ENTRYID] = "Feet",
+	[PLAYER_VISIBLE_ITEM_9_ENTRYID] = "Wrist",
+	[PLAYER_VISIBLE_ITEM_10_ENTRYID] = "Hands",
+	[PLAYER_VISIBLE_ITEM_15_ENTRYID] = "Back",
+	[PLAYER_VISIBLE_ITEM_16_ENTRYID] = "MainHand",
+	[PLAYER_VISIBLE_ITEM_17_ENTRYID] = "SecondaryHand",
+	[PLAYER_VISIBLE_ITEM_18_ENTRYID] = "Ranged",
+	[PLAYER_VISIBLE_ITEM_19_ENTRYID] = "Tabard"
+}
+
+-- Cached globals for performance
+local GetItemIcon, SetItemButtonTexture, PlaySound, CreateFrame, GameTooltip = 
+      GetItemIcon, SetItemButtonTexture, PlaySound, CreateFrame, GameTooltip
+
+-- State management
+local itemButtons = {}
+local isInputHovered = false
+local currentSlot = PLAYER_VISIBLE_ITEM_1_ENTRYID
+
+originalTransmogIds = originalTransmogId or {}
+AIO.AddSavedVarChar("originalTransmogIds")
+currentTransmogIds = originalTransmogIds
+
 
 local currentSlotItemIds = nil -- hold ids and icon paths
 local currentPage = 1
-local currentSlot = PLAYER_VISIBLE_ITEM_1_ENTRYID
 local morePages = false
 local itemButtons = {}
 local currentTooltipSlot = nil
@@ -114,8 +113,7 @@ local backdropInfo =
 					};
 
 
--- TODO timer with wait time if pressed to fast. wait at least 1 second before accepting another call
--- TODO I key for opening the panel. Add to micro bar down at the bottom
+-- TODO Add spam preventing measures
 
 function SetItemButtonTexture(button, texture)
 	if ( not button ) then
@@ -151,7 +149,7 @@ GameTooltip:HookScript("OnTooltipSetItem", function(tooltip, ...)
 		return;
 	end
 	currentTooltipSlot = slotName
-	if ( EquipmentSlotFrameNames[slotName] ) then
+	if ( EQUIPMENT_SLOT_FRAME_NAMES[slotName] ) then
 		--if ( not name ) then 
 			--GameTooltip:SetHyperlink("item:"..itemId..":0:0:0:0:0:0:0")
 		--end
@@ -161,190 +159,33 @@ GameTooltip:HookScript("OnTooltipSetItem", function(tooltip, ...)
 			return;
 		end
 		
-		local slotId = nil
-		if ( slotName == "CharacterHeadSlot" ) then
-			slotId = PLAYER_VISIBLE_ITEM_1_ENTRYID
-		elseif ( slotName == "CharacterShoulderSlot" ) then
-			slotId = PLAYER_VISIBLE_ITEM_3_ENTRYID
-		elseif ( slotName == "CharacterShirtSlot" ) then
-			slotId = PLAYER_VISIBLE_ITEM_4_ENTRYID
-		elseif ( slotName == "CharacterChestSlot" ) then
-			slotId = PLAYER_VISIBLE_ITEM_5_ENTRYID
-		elseif ( slotName == "CharacterWaistSlot" ) then
-			slotId = PLAYER_VISIBLE_ITEM_6_ENTRYID
-		elseif ( slotName == "CharacterLegsSlot" ) then
-			slotId = PLAYER_VISIBLE_ITEM_7_ENTRYID
-		elseif ( slotName == "CharacterWristSlot" ) then
-			slotId = PLAYER_VISIBLE_ITEM_9_ENTRYID
-		elseif ( slotName == "CharacterHandsSlot" ) then
-			slotId = PLAYER_VISIBLE_ITEM_10_ENTRYID
-		elseif ( slotName == "CharacterFeetSlot" ) then
-			slotId = PLAYER_VISIBLE_ITEM_8_ENTRYID
-		elseif ( slotName == "CharacterBackSlot" ) then
-			slotId = PLAYER_VISIBLE_ITEM_15_ENTRYID
-		elseif ( slotName == "CharacterMainHandSlot" ) then
-			slotId = PLAYER_VISIBLE_ITEM_16_ENTRYID
-		elseif ( slotName == "CharacterSecondaryHandSlot" ) then
-			slotId = PLAYER_VISIBLE_ITEM_17_ENTRYID
-		elseif ( slotName == "CharacterRangedSlot" ) then
-			slotId = PLAYER_VISIBLE_ITEM_18_ENTRYID
-		elseif ( slotName == "CharacterTabardSlot" ) then
-			slotId = PLAYER_VISIBLE_ITEM_19_ENTRYID
-		end
-		
+        -- TODO remove Character and Slot from string slotName to search slot id in table
 		if ( slotId ) then
+            -- TODO just search db for item in accoumt_transmog
 			--AIO.Handle("Transmog", "SetEquipmentTransmogInfo", slotId, currentTooltipSlot) TODO This will only works with cached slots?? Inf loop when trying to call server and back
 		end
 		return;
 	end
-	-- just search db for item in accoumt_transmog
 	tooltip:Show()
 end)
 
---local mainBackground = TransmogFrame:CreateTexture("BackgroundTransmogFrame", nil)
---mainBackground:SetSize(TransmogFrame:GetWidth()-12, TransmogFrame:GetHeight()-32)
---mainBackground:SetPoint("BOTTOM", 2, 7)
---mainBackground:SetTexture("Interface\\Transmog\\CollectionsBackgroundTile", "REPEAT", "REPEAT")
---mainBackground:SetVertTile(true)
---mainBackground:SetHorizTile(true)
-
---local mainLeftTopBackground = TransmogFrame:CreateTexture("LeftTopTransmogFrame", "OVERLAY")
---mainLeftTopBackground:SetSize(87.04, 74.24)
---mainLeftTopBackground:SetPoint("TOPLEFT", 9, -26.5)
---mainLeftTopBackground:SetTexture("Interface\\Transmog\\Collections")
---mainLeftTopBackground:SetTexCoord(0, 0.17, 0.02, 0.148)
-
---local mainRightTopBackground = TransmogFrame:CreateTexture("RightTopTransmogFrame", "OVERLAY")
---mainRightTopBackground:SetSize(87.04, 74.24)
---mainRightTopBackground:SetPoint("TOPRIGHT", -8, -25)
---mainRightTopBackground:SetTexture("Interface\\Transmog\\Collections")
---mainRightTopBackground:SetTexCoord(0.83, 1, 0.855, 0.98)
---mainRightTopBackground:SetTexCoord(1, 1, 1, 1, 1, 1, 1, 1)
---mainRightTopBackground:SetTexCoord(0, 0.17, 0.02, 0.148)
-
---local mainRightBottomBackground = TransmogFrame:CreateTexture("RightBottomTransmogFrame", "OVERLAY")
---mainRightBottomBackground:SetSize(-87.04, -74.24)
---mainRightBottomBackground:SetPoint("BOTTOMRIGHT", -92.04, 83.74)
---mainRightBottomBackground:SetTexture("Interface\\Transmog\\Collections")
---mainRightBottomBackground:SetTexCoord(0, 0.17, 0.02, 0.148)
-
-local function SetCharacterFrameTransmogItemButtonTextures()
-	--if ( TransmogFrame:IsShown() ) then
-		local textureName = "Interface\\Icons\\INV_Mask_01"
-		if ( currentHeadTransmogId ~= nil and currentHeadTransmogId ~= 0 ) then
-			textureName = GetItemIcon(currentHeadTransmogId)
-		elseif (currentHeadTransmogId == 0) then
-			SetItemButtonTexture(CharacterHeadSlot, textureName) -- TODO Add for everything
-		end
-
-
-		if ( currentShoudlerTransmogId ~= nil and currentShoudlerTransmogId ~= 0 ) then
-			textureName = GetItemIcon(currentShoudlerTransmogId)
-		else
-			textureName = "Interface\\Icons\\INV_Mask_01"
-		end
-		SetItemButtonTexture(CharacterShoulderSlot, textureName)
-
-
-		if ( currentShirtTransmogId ~= nil and currentShirtTransmogId ~= 0 ) then
-			textureName = GetItemIcon(currentShirtTransmogId)
-		else
-			textureName = "Interface\\Icons\\INV_Mask_01"
-		end
-		SetItemButtonTexture(CharacterShirtSlot, textureName)
-
-
-		if ( currentChestTransmogId ~= nil and currentChestTransmogId ~= 0 ) then
-			textureName = GetItemIcon(currentChestTransmogId)
-		else
-			textureName = "Interface\\Icons\\INV_Mask_01"
-		end
-		SetItemButtonTexture(CharacterChestSlot, textureName)
-
-
-		if ( currentWaistTransmogId ~= nil and currentWaistTransmogId ~= 0 ) then
-			textureName = GetItemIcon(currentWaistTransmogId)
-		else
-			textureName = "Interface\\Icons\\INV_Mask_01"
-		end
-		SetItemButtonTexture(CharacterWaistSlot, textureName)
-
-
-		if ( currentLegsTransmogId ~= nil and currentLegsTransmogId ~= 0 ) then
-			textureName = GetItemIcon(currentLegsTransmogId)
-		else
-			textureName = "Interface\\Icons\\INV_Mask_01"
-		end
-		SetItemButtonTexture(CharacterLegsSlot, textureName)
-
-
-		if ( currentFeetTransmogId ~= nil and currentFeetTransmogId ~= 0 ) then
-			textureName = GetItemIcon(currentFeetTransmogId)
-		else
-			textureName = "Interface\\Icons\\INV_Mask_01"
-		end
-		SetItemButtonTexture(CharacterFeetSlot, textureName)
-
-
-		if ( currentWristTransmogId ~= nil and currentWristTransmogId ~= 0 ) then
-			textureName = GetItemIcon(currentWristTransmogId)
-		else
-			textureName = "Interface\\Icons\\INV_Mask_01"
-		end
-		SetItemButtonTexture(CharacterWristSlot, textureName)
-
-
-		if ( currentHandsTransmogId ~= nil and currentHandsTransmogId ~= 0 ) then
-			textureName = GetItemIcon(currentHandsTransmogId)
-		else
-			textureName = "Interface\\Icons\\INV_Mask_01"
-		end
-		SetItemButtonTexture(CharacterHandsSlot, textureName)
-
-
-		if ( currentBackTransmogId ~= nil and currentBackTransmogId ~= 0 ) then
-			textureName = GetItemIcon(currentBackTransmogId)
-		else
-			textureName = "Interface\\Icons\\INV_Mask_01"
-		end
-		SetItemButtonTexture(CharacterBackSlot, textureName)
-
-
-		if ( currentMainHandTransmogId ~= nil and currentMainHandTransmogId ~= 0 ) then
-			textureName = GetItemIcon(currentMainHandTransmogId)
-		else
-			textureName = "Interface\\Icons\\INV_Mask_01"
-		end
-		SetItemButtonTexture(CharacterMainHandSlot, textureName)
-
-
-		if ( currentOffHandTransmogId ~= nil and currentOffHandTransmogId ~= 0 ) then
-			textureName = GetItemIcon(currentOffHandTransmogId)
-		else
-			textureName = "Interface\\Icons\\INV_Mask_01"
-		end
-		SetItemButtonTexture(CharacterSecondaryHandSlot, textureName)
-
-
-		if ( currentRangedTransmogId ~= nil and currentRangedTransmogId ~= 0 ) then
-			textureName = GetItemIcon(currentRangedTransmogId)
-		else
-			textureName = "Interface\\Icons\\INV_Mask_01"
-		end
-		SetItemButtonTexture(CharacterRangedSlot, textureName)
-
-
-		if ( currentTabardTransmogId ~= nil and currentTabardTransmogId ~= 0 ) then
-			textureName = GetItemIcon(currentTabardTransmogId)
-		else
-			textureName = "Interface\\Icons\\INV_Mask_01"
-		end
-		SetItemButtonTexture(CharacterTabardSlot, textureName)
-		return;
-	--end
+local function UpdateSlotTexture(slotName)
+    local slotFrame = _G["Character" .. slotName .. "Slot"]
+    local transmogId = currentTransmogIds[slotName]
+	if ( transmogId ~= nil and transmogId ~= 0 ) then
+		SetItemButtonTexture(slotFrame, GetItemIcon(transmogId))
+	elseif ( transmogId == 0 ) then
+		SetItemButtonTexture(slotFrame, EMPTY_TEXTURE)
+	end
 end
 
-local function ResetCharacterFrameTransmogItemButtonTextures()
+local function UpdateAllSlotTextures()
+    for slotName, _ in pairs(SLOT_IDS) do
+        UpdateSlotTexture(slotName)
+    end
+end
+
+local function ResetUpdateAllSlotTextures()
 	PaperDollItemSlotButton_Update(CharacterHeadSlot)
 	PaperDollItemSlotButton_Update(CharacterShoulderSlot)
 	PaperDollItemSlotButton_Update(CharacterShirtSlot)
@@ -361,25 +202,18 @@ local function ResetCharacterFrameTransmogItemButtonTextures()
 	PaperDollItemSlotButton_Update(CharacterTabardSlot)
 end
 
-function LoadTransmogsFromCurrentIds()
-	CharacterModelFrameFake:SetUint("player")
-	CharacterModelFrame:SetUnit("player")
-	CharacterModelFrame:Undress()
-	if ( currentHeadTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentHeadTransmogId) end
-	if ( currentShoudlerTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentShoudlerTransmogId) end
-	if ( currentShirtTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentShirtTransmogId) end
-	if ( currentChestTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentChestTransmogId) end
-	if ( currentWaistTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentWaistTransmogId) end
-	if ( currentLegsTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentLegsTransmogId) end
-	if ( currentFeetTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentFeetTransmogId) end
-	if ( currentWristTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentWristTransmogId) end
-	if ( currentHandsTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentHandsTransmogId) end
-	if ( currentBackTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentBackTransmogId) end
-	--if ( currentMainHandTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentMainHandTransmogId, "MAINHANDSLOT") end
-	--if ( currentOffHandTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentOffHandTransmogId, "SECONDARYHANDSLOT") end
-	--if ( currentRangedTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentRangedTransmogId) end
-	if ( currentTabardTransmogId ~= nil ) then CharacterModelFrame:TryOn(currentTabardTransmogId) end
-	ResetCharacterFrameTransmogItemButtonTextures()
+local function LoadTransmogsFromCurrentIds()
+    CharacterModelFrameFake:SetUnit("player")
+    CharacterModelFrame:SetUnit("player")
+    CharacterModelFrame:Undress()
+    
+    for slotName, transmogId in pairs(currentTransmogIds) do
+        if transmogId then
+            CharacterModelFrame:TryOn(transmogId)
+        end
+    end
+    
+    ResetUpdateAllSlotTextures()
 end
 
 local function OnClickItemTransmogButton(btn, buttonType)
@@ -387,84 +221,30 @@ local function OnClickItemTransmogButton(btn, buttonType)
 	LoadTransmogsFromCurrentIds()
 	local itemId = btn:GetID()
 	local textureName = GetItemIcon(itemId)
-	if ( currentSlot == PLAYER_VISIBLE_ITEM_1_ENTRYID ) then
-		currentHeadTransmogId = itemId
-		CharacterModelFrame:TryOn(itemId)
-		SetItemButtonTexture(CharacterHeadSlot, textureName)
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_3_ENTRYID ) then
-		currentShoudlerTransmogId = itemId
-		CharacterModelFrame:TryOn(itemId)
-		SetItemButtonTexture(CharacterShoulderSlot, textureName)
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_4_ENTRYID ) then
-		currentShirtTransmogId = itemId
-		CharacterModelFrame:TryOn(itemId)
-		SetItemButtonTexture(CharacterShirtSlot, textureName)
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_5_ENTRYID ) then
-		currentChestTransmogId = itemId
-		CharacterModelFrame:TryOn(itemId)
-		SetItemButtonTexture(CharacterChestSlot, textureName)
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_6_ENTRYID ) then
-		currentWaistTransmogId = itemId
-		CharacterModelFrame:TryOn(itemId)
-		SetItemButtonTexture(CharacterWaistSlot, textureName)
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_7_ENTRYID ) then
-		currentLegsTransmogId = itemId
-		CharacterModelFrame:TryOn(itemId)
-		SetItemButtonTexture(CharacterLegsSlot, textureName)
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_8_ENTRYID ) then
-		currentFeetTransmogId = itemId
-		CharacterModelFrame:TryOn(itemId)
-		SetItemButtonTexture(CharacterFeetSlot, textureName)
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_9_ENTRYID ) then
-		currentWristTransmogId = itemId
-		CharacterModelFrame:TryOn(itemId)
-		SetItemButtonTexture(CharacterWristSlot, textureName)
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_10_ENTRYID ) then
-		currentHandsTransmogId = itemId
-		CharacterModelFrame:TryOn(itemId)
-		SetItemButtonTexture(CharacterHandsSlot, textureName)
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_15_ENTRYID ) then
-		currentBackTransmogId = itemId
-		CharacterModelFrame:TryOn(itemId)
-		SetItemButtonTexture(CharacterBackSlot, textureName)
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_16_ENTRYID ) then
-		currentMainHandTransmogId = itemId
-		CharacterModelFrame:TryOn(itemId, "MAINHANDSLOT")
-		SetItemButtonTexture(CharacterMainHandSlot, textureName)
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_17_ENTRYID ) then
-		currentOffHandTransmogId = itemId
-		CharacterModelFrame:TryOn(itemId, "SECONDARYHANDSLOT")
-		SetItemButtonTexture(CharacterSecondaryHandSlot, textureName)
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_18_ENTRYID ) then
-		currentRangedTransmogId = itemId
-		CharacterModelFrame:TryOn(itemId)
-		SetItemButtonTexture(CharacterRangedSlot, textureName)
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_19_ENTRYID ) then
-		currentTabardTransmogId = itemId
-		CharacterModelFrame:TryOn(itemId)
-		SetItemButtonTexture(CharacterTabardSlot, textureName)
-	end
+	local slotName = TRANSMOG_SLOT_MAPPING[currentSlot]
+	currentTransmogIds[slotName] = itemId
+	CharacterModelFrame:TryOn(itemId)
+    SetItemButtonTexture("Character" .. slotName .. "Slot", textureName)
 end
 
 function OnClickResetAllButton(btn)
 	PlaySound("GAMEGENERICBUTTONPRESS", "master")
-	currentHeadTransmogId = 0
-	currentShoudlerTransmogId = 0
-	currentShirtTransmogId = 0
-	currentChestTransmogId = 0
-	currentWaistTransmogId = 0
-	currentLegsTransmogId = 0
-	currentFeetTransmogId = 0
-	currentWristTransmogId = 0
-	currentHandsTransmogId = 0
-	currentBackTransmogId = 0
-	currentMainHandTransmogId = 0
-	currentOffHandTransmogId = 0
-	currentRangedTransmogId = 0
-	currentTabardTransmogId = 0
+    for slotName, _ in pairs(SLOT_IDS) do
+        currentTransmogIds[slotName] = 0
+    end
 	CharacterModelFrame:SetUnit("player")
 	CharacterModelFrame:Undress()
-	ResetCharacterFrameTransmogItemButtonTextures()
+    ResetUpdateAllSlotTextures()
+end
+
+function OnClickDeleteAllButton(btn)
+	PlaySound("GAMEGENERICBUTTONPRESS", "master")
+    for slotName, _ in pairs(SLOT_IDS) do
+        currentTransmogIds[slotName] = nil
+    end
+	CharacterModelFrame:SetUnit("player")
+	CharacterModelFrame:Undress()
+	OnClickApplyAllowTransmogs()
 end
 
 local function OnLeaveItemToolTip(btn)
@@ -533,24 +313,6 @@ local function InitTabSlots()
 		itemModel:SetPoint("CENTER", 0, -20)
 		itemModel:SetSize(256, 256)
 		itemModel:Hide()
-		-- local itemButtonLeft = CreateFrame("Button", "ItemModel"..i.."RotateLeftButton", ItemModel)
-		-- itemButtonLeft:SetPoint("TOPLEFT", itemChild, "TOPLEFT")
-		-- itemButtonLeft:SetFrameLevel(30)
-		-- itemButtonLeft:SetSize(35, 35)
-		-- itemButtonLeft:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
-		-- itemButtonLeft:SetScript("OnClick", function(self) Model_RotateLeft(self:GetParent()) end)
-		-- itemButtonLeft:SetNormalTexture("Interface\\Buttons\\UI-RotationLeft-Button-Up")
-		-- itemButtonLeft:SetPushedTexture("Interface\\Buttons\\UI-RotationLeft-Button-Down")
-		-- itemButtonLeft:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Round", "ADD")
-		-- local itemButtonRight = CreateFrame("Button", "ItemModel"..i.."RotateRightButton", ItemModel)
-		-- itemButtonRight:SetPoint("TOPLEFT", itemButtonLeft, "TOPRIGHT")
-		-- itemButtonRight:SetFrameLevel(30)
-		-- itemButtonRight:SetSize(35, 35)
-		-- itemButtonRight:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
-		-- itemButtonRight:SetScript("OnClick", function(self) Model_RotateRight(self:GetParent()) end)
-		-- itemButtonRight:SetNormalTexture("Interface\\Buttons\\UI-RotationRight-Button-Up")
-		-- itemButtonRight:SetPushedTexture("Interface\\Buttons\\UI-RotationRight-Button-Down")
-		-- itemButtonRight:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Round", "ADD")
 		local itemButton = CreateFrame("Button", "ItemButton"..i, leftBottomItemFrame, "ItemButtonTemplate")
 		itemButton:SetPoint("BOTTOMLEFT", 5, 40)
 		itemButton:SetScript("OnClick", OnClickItemTransmogButton)
@@ -676,7 +438,7 @@ function PaperDollItemSlotButton_Update(self)
 		self.hasItem = nil;
 	end
 
-	SetCharacterFrameTransmogItemButtonTextures()
+	UpdateAllSlotTextures()
 	
 	if ( not GearManagerDialog:IsShown() ) then
 		self.ignored = nil;
@@ -697,36 +459,20 @@ end
 
 function OnClickResetCurrentTransmogSlot(btn)
 	PlaySound("GAMEGENERICBUTTONPRESS", "master")
-	if ( currentSlot == PLAYER_VISIBLE_ITEM_1_ENTRYID ) then
-		currentHeadTransmogId = 0
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_3_ENTRYID ) then
-		currentShoudlerTransmogId = 0
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_4_ENTRYID ) then
-		currentShirtTransmogId = 0
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_5_ENTRYID ) then
-		currentChestTransmogId = 0
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_6_ENTRYID ) then
-		currentWaistTransmogId = 0
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_7_ENTRYID ) then
-		currentLegsTransmogId = 0
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_8_ENTRYID ) then
-		currentFeetTransmogId = 0
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_9_ENTRYID ) then
-		currentWristTransmogId = 0
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_10_ENTRYID ) then
-		currentHandsTransmogId = 0
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_15_ENTRYID ) then
-		currentBackTransmogId = 0
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_16_ENTRYID ) then
-		currentMainHandTransmogId = 0
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_17_ENTRYID ) then
-		currentOffHandTransmogId = 0
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_18_ENTRYID ) then
-		currentRangedTransmogId = 0
-	elseif ( currentSlot == PLAYER_VISIBLE_ITEM_19_ENTRYID ) then
-		currentTabardTransmogId = 0
-	end
-	LoadTransmogsFromCurrentIds()
+    local slotName = TRANSMOG_SLOT_MAPPING[currentSlot]
+    currentTransmogIds[slotName] = 0
+    UpdateSlotTexture(slotName)
+    LoadTransmogsFromCurrentIds()
+end
+
+function OnClickDeleteCurrentTransmogSlot(btn)
+	PlaySound("GAMEGENERICBUTTONPRESS", "master")
+    local slotName = TRANSMOG_SLOT_MAPPING[currentSlot]
+    currentTransmogIds[slotName] = nil
+    originalTransmogIds[slotName] = nil
+    AIO.Handle("Transmog", "EquipTransmogItem", nil, currentSlot)
+    LoadTransmogsFromCurrentIds()
+    UpdateSlotTexture(slotName)
 end
 
 function TransmogHandlers.LoadTransmogsAfterSave(player)
@@ -735,35 +481,12 @@ end
 
 function OnClickApplyAllowTransmogs(btn)
 	PlaySound("GAMEGENERICBUTTONPRESS", "master")
-	if ( currentHeadTransmogId ~= nil ) then AIO.Handle("Transmog", "EquipTransmogItem", currentHeadTransmogId, PLAYER_VISIBLE_ITEM_1_ENTRYID) end
-	if ( currentShoudlerTransmogId ~= nil ) then AIO.Handle("Transmog", "EquipTransmogItem", currentShoudlerTransmogId, PLAYER_VISIBLE_ITEM_3_ENTRYID) end
-	if ( currentShirtTransmogId ~= nil ) then AIO.Handle("Transmog", "EquipTransmogItem", currentShirtTransmogId, PLAYER_VISIBLE_ITEM_4_ENTRYID) end
-	if ( currentChestTransmogId ~= nil ) then AIO.Handle("Transmog", "EquipTransmogItem", currentChestTransmogId, PLAYER_VISIBLE_ITEM_5_ENTRYID) end
-	if ( currentWaistTransmogId ~= nil ) then AIO.Handle("Transmog", "EquipTransmogItem", currentWaistTransmogId, PLAYER_VISIBLE_ITEM_6_ENTRYID) end
-	if ( currentLegsTransmogId ~= nil ) then AIO.Handle("Transmog", "EquipTransmogItem", currentLegsTransmogId, PLAYER_VISIBLE_ITEM_7_ENTRYID) end
-	if ( currentFeetTransmogId ~= nil ) then AIO.Handle("Transmog", "EquipTransmogItem", currentFeetTransmogId, PLAYER_VISIBLE_ITEM_8_ENTRYID) end
-	if ( currentWristTransmogId ~= nil ) then AIO.Handle("Transmog", "EquipTransmogItem", currentWristTransmogId, PLAYER_VISIBLE_ITEM_9_ENTRYID) end
-	if ( currentHandsTransmogId ~= nil ) then AIO.Handle("Transmog", "EquipTransmogItem", currentHandsTransmogId, PLAYER_VISIBLE_ITEM_10_ENTRYID) end
-	if ( currentBackTransmogId ~= nil ) then AIO.Handle("Transmog", "EquipTransmogItem", currentBackTransmogId, PLAYER_VISIBLE_ITEM_15_ENTRYID) end
-	if ( currentMainHandTransmogId ~= nil ) then AIO.Handle("Transmog", "EquipTransmogItem", currentMainHandTransmogId, PLAYER_VISIBLE_ITEM_16_ENTRYID) end
-	if ( currentOffHandTransmogId ~= nil ) then AIO.Handle("Transmog", "EquipTransmogItem", currentOffHandTransmogId, PLAYER_VISIBLE_ITEM_17_ENTRYID) end
-	if ( currentRangedTransmogId ~= nil ) then AIO.Handle("Transmog", "EquipTransmogItem", currentRangedTransmogId, PLAYER_VISIBLE_ITEM_18_ENTRYID) end
-	if ( currentTabardTransmogId ~= nil ) then AIO.Handle("Transmog", "EquipTransmogItem", currentTabardTransmogId, PLAYER_VISIBLE_ITEM_19_ENTRYID) end
-	originalHeadTransmogId =  currentHeadTransmogId
-	originalShoudlerTransmogId = currentShoudlerTransmogId
-	originalShirtTransmogId = currentShirtTransmogId
-	originalChestTransmogId = currentChestTransmogId
-	originalWaistTransmogId = currentWaistTransmogId
-	originalLegsTransmogId = currentLegsTransmogId
-	originalFeetTransmogId = currentFeetTransmogId
-	originalWristTransmogId = currentWristTransmogId
-	originalHandsTransmogId = currentHandsTransmogId
-	originalBackTransmogId = currentBackTransmogId
-	originalMainHandTransmogId = currentMainHandTransmogId
-	originalOffHandTransmogId = currentOffHandTransmogId
-	originalRangedTransmogId = currentRangedTransmogId
-	originalTabardTransmogId = currentTabardTransmogId
-	LoadTransmogsFromCurrentIds()
+    for slotName, entryId in pairs(SLOT_IDS) do
+        local transmogId = currentTransmogIds[slotName]
+        AIO.Handle("Transmog", "EquipTransmogItem", transmogId, entryId)
+        originalTransmogIds[slotName] = transmogId
+    end
+    LoadTransmogsFromCurrentIds()
 end
 
 local function TransmogTabTooltip(btn)
@@ -787,14 +510,14 @@ function TransmogHandlers.InitTab(player, newSlotItemIds, page, hasMorePages)
 	else
 		LeftButton:Disable()
 	end
-	
+
 	for i, child in ipairs(itemButtons) do
 		if ( currentSlotItemIds[i] == nil ) then
 			child:SetID(0)
 			child.itemButton:SetID(0)
 			child.itemButton:Disable()
 			child.itemModel:Hide()
-		    SetItemButtonTexture(child.itemButton, EmptyEquipmentIconBackgroundPath..EquipmentIconTypes[Transmog_CalculateSlotReverse(currentSlot)])
+		    SetItemButtonTexture(child.itemButton, EMPTY_EQUIPMENT_ICON_BACKGROUND_PATH..EQUIPMENT_ICON_TYPES[Transmog_CalculateSlotReverse(currentSlot)])
 		else
 			child:SetID(currentSlotItemIds[i])
 			child.itemButton:SetID(currentSlotItemIds[i])
@@ -853,176 +576,34 @@ function SetTab()
 end
 
 function TransmogHandlers.SetTransmogItemIdClient(player, slot, id, realItemId)
-	if ( tonumber(slot) == PLAYER_VISIBLE_ITEM_1_ENTRYID ) then
-		if ( id ~= 0 and id ~= nil and ( currentHeadTransmogId == nil or currentHeadTransmogId == 0 ) and realItemId ~= id ) then
-			currentHeadTransmogId = id
-			originalHeadTransmogId = id
+    -- Get the transmog part name based on the slot
+    local part = TRANSMOG_SLOT_MAPPING[tonumber(slot)]
+    if part then
+        -- If the part is found, use the current and original transmog tables
+        local currentTransmogId = currentTransmogIds[part]
+        local originalTransmogId = originalTransmogIds[part]
+        
+        if (id ~= 0 and id ~= nil and (currentTransmogId == nil or currentTransmogId == 0) and realItemId ~= id) then
+            currentTransmogIds[part] = id
+            originalTransmogIds[part] = id
+		if (part ~= "MainHand" and part ~= "SecondaryHandSlot" and part ~= "Ranged") then
 			CharacterModelFrame:TryOn(id)
-		elseif ( currentHeadTransmogId ~= nil and currentHeadTransmogId ~= 0 ) then
-			CharacterModelFrame:TryOn(currentHeadTransmogId)
-		elseif ( id ~= 0 and realItemId ~= 0 and realItemId ~= nil ) then
-			currentHeadTransmogId = realItemId
-			originalHeadTransmogId = realItemId
-			CharacterModelFrame:TryOn(realItemId)
 		end
-	elseif ( tonumber(slot) == PLAYER_VISIBLE_ITEM_3_ENTRYID ) then
-		if ( id ~= 0 and id ~= nil and ( currentShoudlerTransmogId == nil or currentShoudlerTransmogId == 0 ) and realItemId ~= id ) then
-			currentShoudlerTransmogId = id
-			originalShoudlerTransmogId = id
-			CharacterModelFrame:TryOn(id)
-		elseif ( currentShoudlerTransmogId ~= nil and currentShoudlerTransmogId ~= 0 ) then
-			CharacterModelFrame:TryOn(currentShoudlerTransmogId)
-		elseif ( id ~= 0 and realItemId ~= 0 and realItemId ~= nil ) then
-			currentShoudlerTransmogId = realItemId
-			originalShoudlerTransmogId = realItemId
-			CharacterModelFrame:TryOn(realItemId)
-		end
-	elseif ( tonumber(slot) == PLAYER_VISIBLE_ITEM_4_ENTRYID ) then
-		if ( id ~= 0 and id ~= nil and ( currentShirtTransmogId == nil or currentShirtTransmogId == 0 ) and realItemId ~= id ) then
-			currentShirtTransmogId = id
-			originalShirtTransmogId = id
-			CharacterModelFrame:TryOn(id)
-		elseif ( currentShirtTransmogId ~= nil and currentShirtTransmogId ~= 0 ) then
-			CharacterModelFrame:TryOn(currentShirtTransmogId)
-		elseif ( id ~= 0 and realItemId ~= 0 and realItemId ~= nil ) then
-			currentShirtTransmogId = realItemId
-			originalShirtTransmogId = realItemId
-			CharacterModelFrame:TryOn(realItemId)
-		end
-	elseif ( tonumber(slot) == PLAYER_VISIBLE_ITEM_5_ENTRYID ) then
-		if ( id ~= 0 and id ~= nil and ( currentChestTransmogId == nil or currentChestTransmogId == 0 ) and realItemId ~= id ) then
-			currentChestTransmogId = id
-			originalChestTransmogId = id
-			CharacterModelFrame:TryOn(id)
-		elseif ( currentChestTransmogId ~= nil and currentChestTransmogId ~= 0 ) then
-			CharacterModelFrame:TryOn(currentChestTransmogId)
-		elseif ( id ~= 0 and realItemId ~= 0 and realItemId ~= nil ) then
-			currentChestTransmogId = realItemId
-			originalChestTransmogId = realItemId
-			CharacterModelFrame:TryOn(realItemId)
-		end
-	elseif ( tonumber(slot) == PLAYER_VISIBLE_ITEM_6_ENTRYID ) then
-		if ( id ~= 0 and id ~= nil and ( currentWaistTransmogId == nil or currentWaistTransmogId == 0 ) and realItemId ~= id ) then
-			currentWaistTransmogId = id
-			originalWaistTransmogId = id
-			CharacterModelFrame:TryOn(id)
-		elseif ( currentWaistTransmogId ~= nil and currentWaistTransmogId ~= 0 ) then
-			CharacterModelFrame:TryOn(currentWaistTransmogId)
-		elseif ( id ~= 0 and realItemId ~= 0 and realItemId ~= nil ) then
-			currentWaistTransmogId = realItemId
-			originalWaistTransmogId = realItemId
-			CharacterModelFrame:TryOn(realItemId)
-		end
-	elseif ( tonumber(slot) == PLAYER_VISIBLE_ITEM_7_ENTRYID ) then
-		if ( id ~= 0 and id ~= nil and ( currentLegsTransmogId == nil or currentLegsTransmogId == 0 ) and realItemId ~= id ) then
-			currentLegsTransmogId = id
-			originalLegsTransmogId = id
-			CharacterModelFrame:TryOn(id)
-		elseif ( currentLegsTransmogId ~= nil and currentLegsTransmogId ~= 0 ) then
-			CharacterModelFrame:TryOn(currentLegsTransmogId)
-		elseif ( id ~= 0 and realItemId ~= 0 and realItemId ~= nil ) then
-			currentLegsTransmogId = realItemId
-			originalLegsTransmogId = realItemId
-			CharacterModelFrame:TryOn(realItemId)
-		end
-	elseif ( tonumber(slot) == PLAYER_VISIBLE_ITEM_8_ENTRYID ) then
-		if ( id ~= 0 and id ~= nil and ( currentFeetTransmogId == nil or currentFeetTransmogId == 0 ) and realItemId ~= id ) then
-			currentFeetTransmogId = id
-			originalFeetTransmogId = id
-			CharacterModelFrame:TryOn(id)
-		elseif ( currentFeetTransmogId ~= nil and currentFeetTransmogId ~= 0 ) then
-			CharacterModelFrame:TryOn(currentFeetTransmogId)
-		elseif ( id ~= 0 and realItemId ~= 0 and realItemId ~= nil ) then
-			currentFeetTransmogId = realItemId
-			originalFeetTransmogId = realItemId
-			CharacterModelFrame:TryOn(realItemId)
-		end
-	elseif ( tonumber(slot) == PLAYER_VISIBLE_ITEM_9_ENTRYID ) then
-		if ( id ~= 0 and id ~= nil and ( currentWristTransmogId == nil or currentWristTransmogId == 0 ) and realItemId ~= id ) then
-			currentWristTransmogId = id
-			originalWristTransmogId = id
-			CharacterModelFrame:TryOn(id)
-		elseif ( currentWristTransmogId ~= nil and currentWristTransmogId ~= 0 ) then
-			CharacterModelFrame:TryOn(currentWristTransmogId)
-		elseif ( id ~= 0 and realItemId ~= 0 and realItemId ~= nil ) then
-			currentWristTransmogId = realItemId
-			originalWristTransmogId = realItemId
-			CharacterModelFrame:TryOn(realItemId)
-		end
-	elseif ( tonumber(slot) == PLAYER_VISIBLE_ITEM_10_ENTRYID ) then
-		if ( id ~= 0 and id ~= nil and ( currentHandsTransmogId == nil or currentHandsTransmogId == 0 ) and realItemId ~= id ) then
-			currentHandsTransmogId = id
-			originalHandsTransmogId = id
-			CharacterModelFrame:TryOn(id)
-		elseif ( currentHandsTransmogId ~= nil and currentHandsTransmogId ~= 0 ) then
-			CharacterModelFrame:TryOn(currentHandsTransmogId)
-		elseif ( id ~= 0 and realItemId ~= 0 and realItemId ~= nil ) then
-			currentHandsTransmogId = realItemId
-			originalHandsTransmogId = realItemId
-			CharacterModelFrame:TryOn(realItemId)
-		end
-	elseif ( tonumber(slot) == PLAYER_VISIBLE_ITEM_15_ENTRYID ) then
-		if ( id ~= 0 and id ~= nil and ( currentBackTransmogId == nil or currentBackTransmogId == 0 ) and realItemId ~= id ) then
-			currentBackTransmogId = id
-			originalBackTransmogId = id
-			CharacterModelFrame:TryOn(id)
-		elseif ( currentBackTransmogId ~= nil and currentBackTransmogId ~= 0 ) then
-			CharacterModelFrame:TryOn(currentBackTransmogId)
-		elseif ( id ~= 0 and realItemId ~= 0 and realItemId ~= nil ) then
-			currentBackTransmogId = realItemId
-			originalBackTransmogId = realItemId
-			CharacterModelFrame:TryOn(realItemId)
-		end
-	elseif ( tonumber(slot) == PLAYER_VISIBLE_ITEM_16_ENTRYID ) then
-		if ( id ~= 0 and id ~= nil and ( currentMainHandTransmogId == nil or currentMainHandTransmogId == 0 ) and realItemId ~= id ) then
-			currentMainHandTransmogId = id
-			originalMainHandTransmogId = id
-			--CharacterModelFrame:TryOn(id)
-		elseif ( currentMainHandTransmogId ~= nil and currentMainHandTransmogId ~= 0 ) then
-			--CharacterModelFrame:TryOn(currentMainHandTransmogId)
-		elseif ( id ~= 0 and realItemId ~= 0 and realItemId ~= nil ) then
-			currentMainHandTransmogId = realItemId
-			originalMainHandTransmogId = realItemId
-			--CharacterModelFrame:TryOn(realItemId)
-		end
-	elseif ( tonumber(slot) == PLAYER_VISIBLE_ITEM_17_ENTRYID ) then
-		if ( id ~= 0 and id ~= nil and ( currentOffHandTransmogId == nil or currentOffHandTransmogId == 0 ) and realItemId ~= id ) then
-			currentOffHandTransmogId = id
-			originalOffHandTransmogId = id
-			--CharacterModelFrame:TryOn(id)
-		elseif ( currentOffHandTransmogId ~= nil and currentOffHandTransmogId ~= 0 ) then
-			--CharacterModelFrame:TryOn(currentOffHandTransmogId)
-		elseif ( id ~= 0 and realItemId ~= 0 and realItemId ~= nil ) then
-			currentOffHandTransmogId = realItemId
-			originalOffHandTransmogId = realItemId
-			--CharacterModelFrame:TryOn(realItemId)
-		end
-	elseif ( tonumber(slot) == PLAYER_VISIBLE_ITEM_18_ENTRYID ) then
-		if ( id ~= 0 and id ~= nil and ( currentRangedTransmogId == nil or currentRangedTransmogId == 0 ) and realItemId ~= id ) then
-			currentRangedTransmogId = id
-			originalRangedTransmogId = id
-			--CharacterModelFrame:TryOn(id)
-		elseif ( currentRangedTransmogId ~= nil and currentRangedTransmogId ~= 0 ) then
-			--CharacterModelFrame:TryOn(currentRangedTransmogId)
-		elseif ( id ~= 0 and realItemId ~= 0 and realItemId ~= nil ) then
-			currentRangedTransmogId = realItemId
-			originalRangedTransmogId = realItemId
-			--CharacterModelFrame:TryOn(realItemId)
-		end
-	elseif ( tonumber(slot) == PLAYER_VISIBLE_ITEM_19_ENTRYID ) then
-		if ( id ~= 0 and id ~= nil and ( currentTabardTransmogId == nil or currentTabardTransmogId == 0 ) and realItemId ~= id ) then
-			currentTabardTransmogId = id
-			originalTabardTransmogId = id
-			CharacterModelFrame:TryOn(id)
-		elseif ( currentTabardTransmogId ~= nil and currentTabardTransmogId ~= 0 ) then
-			CharacterModelFrame:TryOn(currentTabardTransmogId)
-		elseif ( id ~= 0 and realItemId ~= 0 and realItemId ~= nil ) then
-			currentTabardTransmogId = realItemId
-			originalTabardTransmogId = realItemId
-			CharacterModelFrame:TryOn(realItemId)
-		end
-	end
-	ResetCharacterFrameTransmogItemButtonTextures()
+        elseif (currentTransmogId ~= nil and currentTransmogId ~= 0) then
+			if (part ~= "MainHand" and part ~= "SecondaryHandSlot" and part ~= "Ranged") then
+				CharacterModelFrame:TryOn(currentTransmogId)
+			end
+        elseif (id ~= 0 and realItemId ~= 0 and realItemId ~= nil) then
+            currentTransmogIds[part] = realItemId
+            originalTransmogIds[part] = realItemId
+			if (part ~= "MainHand" and part ~= "SecondaryHandSlot" and part ~= "Ranged") then
+				CharacterModelFrame:TryOn(realItemId)
+			end
+        end
+    end
+
+    -- Reset all slot textures
+    ResetUpdateAllSlotTextures()
 end
 
 local function OnClickHeadTab(btn)
@@ -1114,7 +695,7 @@ local function OnEventEnterWorldReloadTransmogIds(self, event)
 		AIO.Handle("Transmog", "SetTransmogItemIds")
 	else
 		AIO.Handle("Transmog", "OnUnequipItem")
-		ResetCharacterFrameTransmogItemButtonTextures()
+		ResetUpdateAllSlotTextures()
 		if ( TransmogFrame:IsShown() ) then
 			LoadTransmogsFromCurrentIds()
 		end
@@ -1122,7 +703,6 @@ local function OnEventEnterWorldReloadTransmogIds(self, event)
 end
 
 function OnTransmogFrameLoad(self)
-	-- get transmog ids and cache them on client
 	ItemSearchInput:SetText("|cff808080Click here and start typing...|r")
 	ItemSearchInput:SetScript("OnEnterPressed", SetSearchTab)
 	
@@ -1272,25 +852,16 @@ function OnTransmogFrameLoad(self)
 	TransmogFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 	TransmogFrame:RegisterEvent("UNIT_MODEL_CHANGED")
 	TransmogFrame:SetScript("OnEvent", OnEventEnterWorldReloadTransmogIds)
+
+	ResetUpdateAllSlotTextures()
 end
 
 function OnClickTransmogButton(self)
 	PlaySound("GAMEGENERICBUTTONPRESS", "master")
-	currentHeadTransmogId = originalHeadTransmogId
-	currentShoudlerTransmogId = originalShoudlerTransmogId
-	currentShirtTransmogId = originalShirtTransmogId
-	currentChestTransmogId = originalChestTransmogId
-	currentWaistTransmogId = originalWaistTransmogId
-	currentLegsTransmogId = originalLegsTransmogId
-	currentFeetTransmogId = originalFeetTransmogId
-	currentWristTransmogId = originalWristTransmogId
-	currentHandsTransmogId = originalHandsTransmogId
-	currentBackTransmogId = originalBackTransmogId
-	currentMainHandTransmogId = originalMainHandTransmogId
-	currentOffHandTransmogId = originalOffHandTransmogId
-	currentRangedTransmogId = originalRangedTransmogId
-	currentTabardTransmogId = originalTabardTransmogId
-	ResetCharacterFrameTransmogItemButtonTextures()
+	for slot, _ in pairs(SLOT_IDS) do
+		currentTransmogIds[slot] = originalTransmogIds[slot]
+	end
+	ResetUpdateAllSlotTextures()
 	CharacterModelFrame:Show()
 	CharacterModelFrameFake:Hide()
 	currentSlot = PLAYER_VISIBLE_ITEM_1_ENTRYID
@@ -1305,21 +876,10 @@ end
 
 function OnHideTransmogFrame(self)
 	PlaySound("INTERFACESOUND_CHARWINDOWCLOSE", "master")
-	currentHeadTransmogId = originalHeadTransmogId
-	currentShoudlerTransmogId = originalShoudlerTransmogId
-	currentShirtTransmogId = originalShirtTransmogId
-	currentChestTransmogId = originalChestTransmogId
-	currentWaistTransmogId = originalWaistTransmogId
-	currentLegsTransmogId = originalLegsTransmogId
-	currentFeetTransmogId = originalFeetTransmogId
-	currentWristTransmogId = originalWristTransmogId
-	currentHandsTransmogId = originalHandsTransmogId
-	currentBackTransmogId = originalBackTransmogId
-	currentMainHandTransmogId = originalMainHandTransmogId
-	currentOffHandTransmogId = originalOffHandTransmogId
-	currentRangedTransmogId = originalRangedTransmogId
-	currentTabardTransmogId = originalTabardTransmogId
-	ResetCharacterFrameTransmogItemButtonTextures()
+	for slot, _ in pairs(SLOT_IDS) do
+		currentTransmogIds[slot] = originalTransmogIds[slot]
+	end
+	ResetUpdateAllSlotTextures()
 	CharacterModelFrame:Hide()
 	CharacterModelFrameFake:SetUnit("player")
 	CharacterModelFrameFake:Show()
@@ -1354,7 +914,3 @@ function PaperDollFrame_OnShow(self)
 	LoadTransmogsFromCurrentIds()
 	-- end custom code
 end
-
---local function OnClickButton(btn)
-    --AIO.Handle("Transmog", "Print", headTab:GetName(), headTab)
---end

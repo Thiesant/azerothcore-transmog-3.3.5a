@@ -4,11 +4,13 @@ Transmog system created with AIO and Eluna for AzerothCore.
 
 ## Installation
 
-- Make sure you have [AIO](https://github.com/Rochet2/AIO) and [https://github.com/azerothcore/mod-eluna](Eluna) on your server/AzerothCore. For help read the mod-eluna documentation for AzerothCore [here](https://github.com/azerothcore/mod-eluna)
+- Make sure you have [AIO](https://github.com/Rochet2/AIO) and [Eluna](https://github.com/azerothcore/mod-eluna) on your server/AzerothCore.
 - Put the contents of the lua_scripts folder inside your lua scripts folder you created for Eluna/AIO
 - Import the sql files inside the sql folder
 - Move the patch mpq file from the patches folder to your "Drive/Game/Data" directory. If necessary rename it. Example: Patch-Z.mpq or Patch-L.mpq
 - Start your server and have fun!
+
+For help read the mod-eluna documentation for AzerothCore [here](https://github.com/azerothcore/mod-eluna)
 
 ![alt text](./Screenshot.png)
 

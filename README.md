@@ -23,3 +23,4 @@ For help read the mod-eluna documentation for AzerothCore [here](https://github.
 - Search with display id
 - Weapon auras
 - Spells/Character Effects
+- SQL files

@@ -424,7 +424,9 @@ function PaperDollItemSlotButton_Update(self)
 		self.hasItem = nil;
 	end
 
-	UpdateSlotTexture(self:GetName())
+	for slotName, _ in pairs(SLOT_IDS) do
+        UpdateSlotTexture(slotName)
+    end
 	
 	if ( not GearManagerDialog:IsShown() ) then
 		self.ignored = nil;
@@ -847,7 +849,6 @@ function OnClickTransmogButton(self)
 	for slot, _ in pairs(SLOT_IDS) do
 		currentTransmogIds[slot] = originalTransmogIds[slot]
 	end
-	UpdateAllSlotTextures()
 	CharacterModelFrame:Show()
 	CharacterModelFrameFake:Hide()
 	currentSlot = PLAYER_VISIBLE_ITEM_1_ENTRYID
@@ -862,8 +863,8 @@ end
 
 function OnHideTransmogFrame(self)
 	PlaySound("INTERFACESOUND_CHARWINDOWCLOSE", "master")
-	for slot, value in pairs(originalTransmogIds) do
-		currentTransmogIds[slot] = value
+	for slot, _ in pairs(SLOT_IDS) do
+		currentTransmogIds[slot] = originalTransmogIds[slot]
 	end
 	UpdateAllSlotTextures()
 	CharacterModelFrame:Hide()

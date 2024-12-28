@@ -93,9 +93,12 @@ local itemButtons = {}
 local isInputHovered = false
 local currentSlot = PLAYER_VISIBLE_ITEM_1_ENTRYID
 
-originalTransmogIds = originalTransmogId or {}
+originalTransmogIds = originalTransmogIds or {}
 AIO.AddSavedVarChar("originalTransmogIds")
-currentTransmogIds = originalTransmogIds
+currentTransmogIds = {}
+for k, v in pairs(originalTransmogIds) do
+	currentTransmogIds[k] = v
+end
 
 
 local currentSlotItemIds = nil -- hold ids and icon paths
@@ -169,7 +172,7 @@ GameTooltip:HookScript("OnTooltipSetItem", function(tooltip, ...)
 	tooltip:Show()
 end)
 
-local function UpdateSlotTexture(slotName)
+function UpdateSlotTexture(slotName)
     local slotFrame = _G["Character" .. slotName .. "Slot"]
     local transmogId = currentTransmogIds[slotName]
 	if ( transmogId ~= nil and transmogId ~= 0 ) then
@@ -179,30 +182,13 @@ local function UpdateSlotTexture(slotName)
 	end
 end
 
-local function UpdateAllSlotTextures()
+function UpdateAllSlotTextures()
     for slotName, _ in pairs(SLOT_IDS) do
-        UpdateSlotTexture(slotName)
+        PaperDollItemSlotButton_Update(_G["Character" .. slotName .. "Slot"])
     end
 end
 
-local function ResetUpdateAllSlotTextures()
-	PaperDollItemSlotButton_Update(CharacterHeadSlot)
-	PaperDollItemSlotButton_Update(CharacterShoulderSlot)
-	PaperDollItemSlotButton_Update(CharacterShirtSlot)
-	PaperDollItemSlotButton_Update(CharacterChestSlot)
-	PaperDollItemSlotButton_Update(CharacterWaistSlot)
-	PaperDollItemSlotButton_Update(CharacterLegsSlot)
-	PaperDollItemSlotButton_Update(CharacterFeetSlot)
-	PaperDollItemSlotButton_Update(CharacterWristSlot)
-	PaperDollItemSlotButton_Update(CharacterHandsSlot)
-	PaperDollItemSlotButton_Update(CharacterBackSlot)
-	PaperDollItemSlotButton_Update(CharacterMainHandSlot)
-	PaperDollItemSlotButton_Update(CharacterSecondaryHandSlot)
-	PaperDollItemSlotButton_Update(CharacterRangedSlot)
-	PaperDollItemSlotButton_Update(CharacterTabardSlot)
-end
-
-local function LoadTransmogsFromCurrentIds()
+function LoadTransmogsFromCurrentIds()
     CharacterModelFrameFake:SetUnit("player")
     CharacterModelFrame:SetUnit("player")
     CharacterModelFrame:Undress()
@@ -213,7 +199,7 @@ local function LoadTransmogsFromCurrentIds()
         end
     end
     
-    ResetUpdateAllSlotTextures()
+    UpdateAllSlotTextures()
 end
 
 local function OnClickItemTransmogButton(btn, buttonType)
@@ -224,7 +210,7 @@ local function OnClickItemTransmogButton(btn, buttonType)
 	local slotName = TRANSMOG_SLOT_MAPPING[currentSlot]
 	currentTransmogIds[slotName] = itemId
 	CharacterModelFrame:TryOn(itemId)
-    SetItemButtonTexture("Character" .. slotName .. "Slot", textureName)
+    SetItemButtonTexture(_G["Character" .. slotName .. "Slot"], textureName)
 end
 
 function OnClickResetAllButton(btn)
@@ -234,7 +220,7 @@ function OnClickResetAllButton(btn)
     end
 	CharacterModelFrame:SetUnit("player")
 	CharacterModelFrame:Undress()
-    ResetUpdateAllSlotTextures()
+    UpdateAllSlotTextures()
 end
 
 function OnClickDeleteAllButton(btn)
@@ -438,7 +424,7 @@ function PaperDollItemSlotButton_Update(self)
 		self.hasItem = nil;
 	end
 
-	UpdateAllSlotTextures()
+	UpdateSlotTexture(self:GetName())
 	
 	if ( not GearManagerDialog:IsShown() ) then
 		self.ignored = nil;
@@ -603,7 +589,7 @@ function TransmogHandlers.SetTransmogItemIdClient(player, slot, id, realItemId)
     end
 
     -- Reset all slot textures
-    ResetUpdateAllSlotTextures()
+    UpdateAllSlotTextures()
 end
 
 local function OnClickHeadTab(btn)
@@ -695,7 +681,7 @@ local function OnEventEnterWorldReloadTransmogIds(self, event)
 		AIO.Handle("Transmog", "SetTransmogItemIds")
 	else
 		AIO.Handle("Transmog", "OnUnequipItem")
-		ResetUpdateAllSlotTextures()
+		UpdateAllSlotTextures()
 		if ( TransmogFrame:IsShown() ) then
 			LoadTransmogsFromCurrentIds()
 		end
@@ -853,7 +839,7 @@ function OnTransmogFrameLoad(self)
 	TransmogFrame:RegisterEvent("UNIT_MODEL_CHANGED")
 	TransmogFrame:SetScript("OnEvent", OnEventEnterWorldReloadTransmogIds)
 
-	ResetUpdateAllSlotTextures()
+	UpdateAllSlotTextures()
 end
 
 function OnClickTransmogButton(self)
@@ -861,7 +847,7 @@ function OnClickTransmogButton(self)
 	for slot, _ in pairs(SLOT_IDS) do
 		currentTransmogIds[slot] = originalTransmogIds[slot]
 	end
-	ResetUpdateAllSlotTextures()
+	UpdateAllSlotTextures()
 	CharacterModelFrame:Show()
 	CharacterModelFrameFake:Hide()
 	currentSlot = PLAYER_VISIBLE_ITEM_1_ENTRYID
@@ -876,10 +862,10 @@ end
 
 function OnHideTransmogFrame(self)
 	PlaySound("INTERFACESOUND_CHARWINDOWCLOSE", "master")
-	for slot, _ in pairs(SLOT_IDS) do
-		currentTransmogIds[slot] = originalTransmogIds[slot]
+	for slot, value in pairs(originalTransmogIds) do
+		currentTransmogIds[slot] = value
 	end
-	ResetUpdateAllSlotTextures()
+	UpdateAllSlotTextures()
 	CharacterModelFrame:Hide()
 	CharacterModelFrameFake:SetUnit("player")
 	CharacterModelFrameFake:Show()

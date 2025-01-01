@@ -15,7 +15,7 @@ Transmog system created with AIO and Eluna for AzerothCore.
 
 For help read the mod-eluna documentation for AzerothCore [here](https://github.com/azerothcore/mod-eluna)
 
-# Know Bugs: Currently under development
+## Know Bugs: Currently under development
 
 - Currently, the real_item id is removed from the database and the transmog is broken by first resetting and then deleting the slot or slots
 - The click area is off-center because the UI button for deletion and reset is not properly centered.

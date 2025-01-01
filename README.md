@@ -26,7 +26,7 @@ For help read the mod-eluna documentation for AzerothCore [here](https://github.
 - Display small info text on items if you have previously obtained the transmog/display id
 - Search with display id
 - Weapon auras
-- Spells/Character Effects
+- Spells/Character effects
 
 <br>
 <br>

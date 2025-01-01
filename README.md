@@ -26,7 +26,7 @@ For help read the mod-eluna documentation for AzerothCore [here](https://github.
 
 ## WIP
 
-. Sound for reset and delete buttons
+- Sound for reset and delete buttons
 - Spam prevention (click events)
 - Display small info text on items if you have previously obtained the transmog/display id
 - Search with display id

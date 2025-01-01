@@ -15,15 +15,16 @@ Transmog system created with AIO and Eluna for AzerothCore.
 
 For help read the mod-eluna documentation for AzerothCore [here](https://github.com/azerothcore/mod-eluna)
 
-![alt text](./Screenshot.png)
-
-
 ## WIP
 
 - Spam prevention (click events)
-- UI redesign
 - Display small info text on items if you have previously obtained the transmog/display id
 - Search with display id
 - Weapon auras
 - Spells/Character Effects
-- SQL files
+
+<br>
+<br>
+
+![alt text](./Screenshot.png)
+![alt text 2](./Screenshot2.png)

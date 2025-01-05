@@ -41,6 +41,6 @@ For help read the mod-eluna documentation for AzerothCore [here](https://github.
 
 ## Legal
 
--Blizzard, Battle.net, World of Warcraft, and all associated logos and designs are trademarks or registered trademarks of Blizzard Entertainment.
--All other trademarks are the property of their respective owners. This project is not affiliated with Blizzard Entertainment or any of their family of sites.
+- Blizzard, Battle.net, World of Warcraft, and all associated logos and designs are trademarks or registered trademarks of Blizzard Entertainment.
+- All other trademarks are the property of their respective owners. This project is not affiliated with Blizzard Entertainment or any of their family of sites.
 

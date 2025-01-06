@@ -432,6 +432,8 @@ function OnClickResetCurrentTransmogSlot(btn)
     currentTransmogIds[slotName] = 0
     UpdateSlotTexture(slotName, false)
 	UpdateSlotTexture(slotName, true)
+	AIO.Handle("Transmog", "EquipTransmogItem", 0, currentSlot)
+	originalTransmogIds[slotName] = transmogId
     LoadTransmogsFromCurrentIds()
 end
 

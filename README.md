@@ -21,10 +21,13 @@ For help read the mod-eluna documentation for AzerothCore [here](https://github.
 ## Know Bugs: Currently under development
 
 - Currently, the real_item id is removed from the database and the transmog is broken by first resetting and then deleting the slot or slots
-- The click area is off-center because the UI button for deletion and reset is not properly centered.
+- The click area is off-center because the UI button for deletion and reset is not properly centered
+- Equip and item retrieve event currently not firing
+- Equipment icons are not reliable be wrong, grey or display no item (May already be fixed!)
 
 ## WIP
 
+- Sound for reset and delete buttons
 - Spam prevention (click events)
 - Display small info text on items if you have previously obtained the transmog/display id
 - Search with display id
@@ -36,3 +39,9 @@ For help read the mod-eluna documentation for AzerothCore [here](https://github.
 
 ![alt text](./Screenshot.png)
 ![alt text 2](./Screenshot2.png)
+
+## Legal
+
+- Blizzard, Battle.net, World of Warcraft, and all associated logos and designs are trademarks or registered trademarks of Blizzard Entertainment.
+- All other trademarks are the property of their respective owners. This project is not affiliated with Blizzard Entertainment or any of their family of sites.
+

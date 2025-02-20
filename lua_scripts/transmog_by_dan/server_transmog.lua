@@ -85,7 +85,7 @@ function TransmogHandlers.LootItemLocale(player, item, count, locale)
         end
 
         local itemLink = "|cffff80ff|Hitem:" .. itemId .. ":0:0:0:0:0:0:0:0|h[" .. locItemName .. "]|h|r"
-        local message = itemLink .. " wurde deiner Transmog-Sammlung hinzugefügt."
+        local message = itemLink .. " has been added to your transmog collection."
         player:SendBroadcastMessage(message)
     end
 end

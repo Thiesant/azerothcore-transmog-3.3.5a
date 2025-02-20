@@ -65,17 +65,36 @@ function Transmog_OnCharacterDelete(event, guid)
 end
 
 function Transmog_OnLootItem(event, player, item, count)
-	local accountGUID = player:GetAccountId()
-	local class = item:GetClass()
-	if class == 2 or class == 4 then
-		-- Transmogs are unlocked on account level!
-		local itemId = item:GetItemTemplate():GetItemId()
-		local inventoryType = item:GetItemTemplate():GetInventoryType()
-		local displayId = item:GetItemTemplate():GetDisplayId()
-		local itemName = item:GetName()
-		itemName = itemName:gsub("'", "''")
-		AuthDBQuery("INSERT IGNORE INTO `account_transmog` (`account_id`, `unlocked_item_id`, `display_id`, `inventory_type`, `item_name`) VALUES ("..accountGUID..", "..itemId..", "..displayId..", "..inventoryType..", '"..itemName.."');")
-	end
+    local accountGUID = player:GetAccountId()
+    local class = item:GetClass()
+
+    if class == 2 or class == 4 then
+        -- Transmogs are unlocked on account level!
+        local itemId = item:GetItemTemplate():GetItemId()
+        local inventoryType = item:GetItemTemplate():GetInventoryType()
+        local displayId = item:GetItemTemplate():GetDisplayId()
+        local itemName = item:GetName()
+
+        itemName = itemName:gsub("'", "''")
+        AuthDBQuery("INSERT IGNORE INTO `account_transmog` (`account_id`, `unlocked_item_id`, `display_id`, `inventory_type`, `item_name`) VALUES (" .. accountGUID .. ", " .. itemId .. ", " .. displayId .. ", " .. inventoryType .. ", '" .. itemName .. "');")
+
+        -- Notify made by SpykeyHD (Ysera-Networks)
+        -- Discord: spykeyhd (SpykeyHD#2170)
+
+        -- Get the Locale from the Client 
+        local locale = player:GetDbcLocale()
+        local locItemName = item:GetItemTemplate():GetName(locale)
+        -- If no Locale is found, use the default name from the Server
+        if locItemName == nil then
+            locItemName = item:GetName()
+        end
+
+        -- Make the ItemLink (Color: Pink) clickable text to show ItemTooltip
+        local itemLink = "|cffff80ff|Hitem:" .. item:GetEntry() .. ":0:0:0:0:0:0:0:0|h[" .. locItemName .. "]|h|r"
+        -- Make the finished message and send it to the given Player
+        local message = itemLink .. " was added to your transmog-collection."
+        player:SendBroadcastMessage(message)
+    end
 end
 
 function Transmog_OnEquipItem(event, player, item, bag, slot)

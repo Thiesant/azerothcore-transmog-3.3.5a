@@ -66,6 +66,12 @@ function Transmog_OnCharacterDelete(event, guid)
 	CharDBQuery("DELETE FROM character_transmog WHERE player_guid = "..guid.."")
 end
 
+-- lang 
+local LOOT_ITEM_LOCALE = {
+    [0] = " has been added to your transmog collection.", -- en
+    [3] = " wurde deiner Transmog-Sammlung hinzugefügt.", -- de
+}
+
 function TransmogHandlers.LootItemLocale(player, item, count, locale)
     local accountGUID = player:GetAccountId()
     local itemId = item
@@ -87,7 +93,7 @@ function TransmogHandlers.LootItemLocale(player, item, count, locale)
         end
 
         local itemLink = "|cffff80ff|Hitem:" .. itemId .. ":0:0:0:0:0:0:0:0|h[" .. locItemName .. "]|h|r"
-        local message = itemLink .. " has been added to your transmog collection."
+        local message = itemLink .. (LOOT_ITEM_LOCALE[locale] or LOOT_ITEM_LOCALE[0])
         player:SendBroadcastMessage(message)
     end
 end

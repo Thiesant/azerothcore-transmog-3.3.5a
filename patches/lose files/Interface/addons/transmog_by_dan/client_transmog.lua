@@ -453,7 +453,7 @@ end
 
 -- language support
 
-local langIdTable = {
+local LANG_ID_TABLE = {
     ["enUS"] = 0,
     ["deDE"] = 3,
 }
@@ -462,7 +462,7 @@ local langIdTable = {
 local ClientLocaleId = 0
 
 local function HandleLocale()
-    local langId = langIdTable[GetLocale()]
+    local langId = LANG_ID_TABLE[GetLocale()]
     -- get locale id from langIdtable
 
     if not langId then

@@ -25,6 +25,8 @@ local PLAYER_VISIBLE_ITEM_17_ENTRYID  = 315
 local PLAYER_VISIBLE_ITEM_18_ENTRYID  = 317
 local PLAYER_VISIBLE_ITEM_19_ENTRYID  = 319
 
+local UNUSABLE_INVENTORY_TYPES = {[2] = true, [11] = true, [12] = true, [18] = true, [24] = true, [27] = true, [28] = true}
+
 function Transmog_CalculateSlot(slot)
 	if (slot == 0) then
 		slot = 1
@@ -68,11 +70,11 @@ function TransmogHandlers.LootItemLocale(player, item, count, locale)
     local accountGUID = player:GetAccountId()
     local itemId = item
     local itemTemplate = GetItemTemplate(itemId)
+    local inventoryType = itemTemplate:GetInventoryType()
     local class = itemTemplate:GetClass()
 
-    if class == 2 or class == 4 then
+    if (class == 2 or class == 4 ) and not UNUSABLE_INVENTORY_TYPES[inventoryType] then
         -- Transmogs are unlocked on account level!
-        local inventoryType = itemTemplate:GetInventoryType()
         local displayId = itemTemplate:GetDisplayId()
         local itemName = itemTemplate:GetName()
 
@@ -100,7 +102,7 @@ function Transmog_OnEquipItem(event, player, item, bag, slot)
 	
 	local class = item:GetClass()
 	local inventoryType = item:GetItemTemplate():GetInventoryType()
-	if ( class == 2 or class == 4 ) and inventoryType ~= 28 then
+	if ( class == 2 or class == 4 ) and not UNUSABLE_INVENTORY_TYPES[inventoryType] then
 		-- Transmogs are unlocked on account level!
 		local itemId = item:GetItemTemplate():GetItemId()
 		local displayId = item:GetItemTemplate():GetDisplayId()

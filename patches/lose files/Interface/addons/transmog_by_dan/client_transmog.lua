@@ -452,21 +452,17 @@ function TransmogHandlers.LoadTransmogsAfterSave(player)
 end
 
 -- language support
-
+-- fallback = enUS
+local CLIENT_FALLBACK_LANG = 0
 local LANG_ID_TABLE = {
     ["enUS"] = 0,
     ["deDE"] = 3,
 }
 
--- fallback = enUS
-local ClientLocaleId = 0
-
 local function HandleLocale()
     local langId = LANG_ID_TABLE[GetLocale()]
-    -- get locale id from langIdtable
-
     if not langId then
-        langId = ClientLocaleId
+        langId = CLIENT_FALLBACK_LANG
     end
 
     return langId

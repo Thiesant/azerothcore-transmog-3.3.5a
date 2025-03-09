@@ -6,7 +6,7 @@ local TransmogHandlers = AIO.AddHandlers("Transmog", {})
 
 local NPCID = 11326
 
-local SLOTS = 8
+local SLOTS = 6
 
 local CALC = 281
 

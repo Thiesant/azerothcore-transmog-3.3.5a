@@ -140,6 +140,12 @@ end)
 GameTooltip:HookScript("OnTooltipSetItem", function(tooltip, ...)
 	local name, link = tooltip:GetItem()
 	local ownerFrame, anchor = tooltip:GetOwner()
+	
+	-- Check if ownerFrame is valid
+	if not ownerFrame then
+		return  -- If ownerFrame is nil, just return and do nothing
+	end
+	
 	local slotName = ownerFrame:GetName()
 	if ( currentTooltipSlot == slotName ) then
 		return;
@@ -190,7 +196,7 @@ end
 function LoadTransmogsFromCurrentIds()
     TransmogModelFrame:SetUnit("player")
     TransmogModelFrame:Undress()
-    
+
     for slotName, transmogId in pairs(currentTransmogIds) do
         if transmogId and slotName ~= "MainHand" and slotName ~= "SecondaryHand" and slotName ~= "Ranged" then
             TransmogModelFrame:TryOn(transmogId)
@@ -248,66 +254,75 @@ local function OnEnterItemToolTip(btn)
 	GameTooltip:Show()
 end
 
-local function InitTabSlots()
-	local lastSlot
-	local firstInRowSlot
-	for i = 1, 6, 1 do
-		local itemChild
-		if ( i == 1 ) then
-			itemChild = CreateFrame("Frame", "ItemChild"..i, TransmogFrame, "TransmogItemWrapperTemplate") 
-			itemChild:SetPoint("TOPLEFT", 480, -240)
-			firstInRowSlot = itemChild
-		else
-			if ( i == 4 ) then
-				itemChild = CreateFrame("Frame", "ItemChild"..i, firstInRowSlot, "TransmogItemWrapperTemplate")
-				itemChild:SetPoint("RIGHT", 0, -200)
-				firstInRowSlot = itemChild
-			else
-				itemChild = CreateFrame("Button", "ItemChild"..i, lastSlot, "TransmogItemWrapperTemplate")
-				itemChild:SetPoint("RIGHT", 230, 0)
-			end
-		end
-		
-		local rightTopItemFrame = CreateFrame("Frame", "RightTopItemFrame"..i, itemChild)
-		rightTopItemFrame:SetPoint("TOPRIGHT", -4, -4)
-		rightTopItemFrame:SetSize(34, 142)
-		local rightTopTexture = rightTopItemFrame:CreateTexture(nil, "Background")
-		rightTopTexture:SetTexture(DressUpTexturePath().."2")
-		rightTopTexture:SetAllPoints()
-		local rightBottomItemFrame = CreateFrame("Frame", "RightBottomItemFrame"..i, itemChild)
-		rightBottomItemFrame:SetPoint("BOTTOMRIGHT", -4, -18)
-		rightBottomItemFrame:SetSize(34, 53)
-		local rightBottomTexture = rightBottomItemFrame:CreateTexture(nil, "Background")
-		rightBottomTexture:SetTexture(DressUpTexturePath().."4")
-		rightBottomTexture:SetAllPoints()
-		local leftTopItemFrame = CreateFrame("Frame", "LeftTopItemFrame"..i, itemChild)
-		leftTopItemFrame:SetPoint("TOPLEFT", 4, -4)
-		leftTopItemFrame:SetSize(109, 142)
-		local leftTopTexture = leftTopItemFrame:CreateTexture(nil, "Background")
-		leftTopTexture:SetTexture(DressUpTexturePath().."1")
-		leftTopTexture:SetAllPoints()
-		local leftBottomItemFrame = CreateFrame("Frame", "LeftBottomItemFrame"..i, itemChild)
-		leftBottomItemFrame:SetPoint("BOTTOMLEFT", 4, -18)
-		leftBottomItemFrame:SetSize(109, 53)
-		local leftBottomTexture = leftBottomItemFrame:CreateTexture(nil, "Background")
-		leftBottomTexture:SetTexture(DressUpTexturePath().."3")
-		leftBottomTexture:SetAllPoints()
-		local itemModel = CreateFrame("DressUpModel", "ItemModel"..i, itemChild)
-		itemModel:SetPoint("CENTER", 0, 0)
-		itemModel:SetSize(142, 172)
-		itemModel:Hide()
-		local itemButton = CreateFrame("Button", "ItemButton"..i, leftBottomItemFrame, "TransmogItemButtonTemplate")
-		itemButton:SetPoint("BOTTOMLEFT", 6, 28)
-		itemButton:SetScript("OnClick", OnClickItemTransmogButton)
-		itemButton:SetScript("OnEnter", OnEnterItemToolTip)
-		itemButton:SetScript("OnLeave", OnLeaveItemToolTip)
-		itemButton:RegisterForClicks("AnyUp");
-		itemButton:Disable()
-		lastSlot = itemChild
-		itemChild.itemModel = itemModel
-		itemChild.itemButton = itemButton
-		table.insert(itemButtons, itemChild)
-	end
+function InitTabSlots()
+    local lastSlot
+    local firstInRowSlot
+    local rowOffset = 150  -- Horizontal spacing between grids
+    local verticalOffset = -260  -- Initial vertical position
+    local startX, startY = 480, verticalOffset  -- Starting position for the first grid
+
+    -- Helper function to create frames for visual assets
+    local function CreateItemFrame(parent, index, texture, width, height, point, xOffset, yOffset)
+        local frame = CreateFrame("Frame", parent:GetName().."Frame"..index, parent)
+        frame:SetPoint(point, xOffset, yOffset)
+        frame:SetSize(width, height)
+        local textureFrame = frame:CreateTexture(nil, "BACKGROUND")
+        textureFrame:SetTexture(texture)
+        textureFrame:SetAllPoints()
+        return frame
+    end
+
+    for i = 1, 8 do
+        local itemChild
+
+        if i == 1 then
+            -- First grid in the first row
+            itemChild = CreateFrame("Frame", "ItemChild"..i, TransmogFrame, "TransmogItemWrapperTemplate")
+            itemChild:SetPoint("TOPLEFT", startX, startY)  -- Starting position for the first grid
+            firstInRowSlot = itemChild
+        elseif i <= 4 then
+            -- First four grids (first row), positioned horizontally with 0-pixel offset
+            itemChild = CreateFrame("Frame", "ItemChild"..i, TransmogFrame, "TransmogItemWrapperTemplate")
+            itemChild:SetPoint("LEFT", lastSlot, "RIGHT", 0, 0)  -- 0-pixel offset between grids
+        elseif i == 5 then
+            -- Start of the second row, anchored to the bottom-left of the first grid
+            itemChild = CreateFrame("Frame", "ItemChild"..i, TransmogFrame, "TransmogItemWrapperTemplate")
+            itemChild:SetPoint("TOPLEFT", firstInRowSlot, "BOTTOMLEFT", 0, 0)  -- 0-pixel offset between rows x & y
+            firstInRowSlot = itemChild
+        else
+            -- Following grids (second row), positioned horizontally with 0-pixel offset
+            itemChild = CreateFrame("Frame", "ItemChild"..i, TransmogFrame, "TransmogItemWrapperTemplate")
+            itemChild:SetPoint("LEFT", lastSlot, "RIGHT", 0, 0)  -- 0-pixel offset between rows x & y
+        end
+
+        -- Create visual assets for the grid (top, bottom, left, right frames)
+        local rightTopItemFrame = CreateItemFrame(itemChild, i, DressUpTexturePath().."2", 34, 142, "TOPRIGHT", -4, -4)
+        local rightBottomItemFrame = CreateItemFrame(itemChild, i, DressUpTexturePath().."4", 34, 53, "BOTTOMRIGHT", -4, -18)
+        local leftTopItemFrame = CreateItemFrame(itemChild, i, DressUpTexturePath().."1", 109, 142, "TOPLEFT", 4, -4)
+        local leftBottomItemFrame = CreateItemFrame(itemChild, i, DressUpTexturePath().."3", 109, 53, "BOTTOMLEFT", 4, -18)
+
+        -- Create the 3D model for this grid
+        local itemModel = CreateFrame("DressUpModel", "ItemModel"..i, itemChild)
+        itemModel:SetPoint("CENTER", 0, 0)
+        itemModel:SetSize(142, 172)
+        itemModel:Hide()
+
+        -- Create the button for this grid
+        local itemButton = CreateFrame("Button", "ItemButton"..i, leftBottomItemFrame, "TransmogItemButtonTemplate")
+        itemButton:SetPoint("BOTTOMLEFT", 6, 28)
+        itemButton:SetScript("OnClick", OnClickItemTransmogButton)
+        itemButton:SetScript("OnEnter", OnEnterItemToolTip)
+        itemButton:SetScript("OnLeave", OnLeaveItemToolTip)
+        itemButton:RegisterForClicks("AnyUp")
+        itemButton:Disable()
+
+        -- Store the model and button in the grid frame
+        itemChild.itemModel = itemModel
+        itemChild.itemButton = itemButton
+        table.insert(itemButtons, itemChild)
+
+        lastSlot = itemChild
+    end
 end
 
 function EnterSearchInput()
@@ -456,6 +471,7 @@ end
 local CLIENT_FALLBACK_LANG = 0
 local LANG_ID_TABLE = {
     ["enUS"] = 0,
+    ["frFR"] = 2,
     ["deDE"] = 3,
 }
 
@@ -489,57 +505,124 @@ local function TransmogTabTooltip(btn)
 end
 
 function TransmogHandlers.InitTab(player, newSlotItemIds, page, hasMorePages)
-	currentSlotItemIds = newSlotItemIds
-	TransmogPaginationText:SetText("Page "..page)
-	
-	if ( hasMorePages ) then
-		RightButton:Enable()
-	else
-		RightButton:Disable()
-	end
-	
-	if ( page > 1 ) then
-		LeftButton:Enable()
-	else
-		LeftButton:Disable()
-	end
+    currentSlotItemIds = newSlotItemIds
+    TransmogPaginationText:SetText("Page "..page)
+    
+    if (hasMorePages) then
+        RightButton:Enable()
+    else
+        RightButton:Disable()
+    end
+    
+    if (page > 1) then
+        LeftButton:Enable()
+    else
+        LeftButton:Disable()
+    end
 
-	for i, child in ipairs(itemButtons) do
-		if ( currentSlotItemIds[i] == nil ) then
-			child:SetID(0)
-			child.itemButton:SetID(0)
-			child.itemButton:Disable()
-			child.itemModel:Hide()
-		    SetItemButtonTexture(child.itemButton, EMPTY_EQUIPMENT_ICON_BACKGROUND_PATH..EQUIPMENT_ICON_TYPES[Transmog_CalculateSlotReverse(currentSlot)])
-		else
-			child:SetID(currentSlotItemIds[i])
-			child.itemButton:SetID(currentSlotItemIds[i])
-			local textureName = GetItemIcon(currentSlotItemIds[i])
-			SetItemButtonTexture(child.itemButton, textureName)
-			child.itemButton:Enable()
-			child.itemModel:Show()
-			child.itemModel:SetUnit("player")
-			if ( currentSlot == PLAYER_VISIBLE_ITEM_15_ENTRYID ) then
-				child.itemModel:SetRotation(180, false)
-			else
-				child.itemModel:SetRotation(0, false)
-			end
-			child.itemModel:Undress()
-			child.itemModel:TryOn(currentSlotItemIds[i])
-			child.itemModel:SetPoint("CENTER", 0, -15)
+    for i, child in ipairs(itemButtons) do
+        if (currentSlotItemIds[i] == nil) then
+            child:SetID(0)
+            child.itemButton:SetID(0)
+            child.itemButton:Disable()
+            child.itemModel:Hide()
+            SetItemButtonTexture(child.itemButton, EMPTY_EQUIPMENT_ICON_BACKGROUND_PATH..EQUIPMENT_ICON_TYPES[Transmog_CalculateSlotReverse(currentSlot)])
+        else
+            child:SetID(currentSlotItemIds[i])
+            child.itemButton:SetID(currentSlotItemIds[i])
+            local textureName = GetItemIcon(currentSlotItemIds[i])
+            SetItemButtonTexture(child.itemButton, textureName)
+            child.itemButton:Enable()
+            child.itemModel:Show()
+            child.itemModel:SetUnit("player")
+            child.itemModel:Undress()
+            child.itemModel:TryOn(currentSlotItemIds[i])
+            child.itemModel:SetPoint("CENTER", 0, -15)
 
-			-- TODO Camera? currently not usable because of lacking ultrawide support
-			--if currentSlot == PLAYER_VISIBLE_ITEM_1_ENTRYID then
-				--child.itemModel:SetPoint("CENTER", 0, 0)
-				--child.itemModel:SetCamera(0)
-			--else
-				--child.itemModel:SetPoint("CENTER", 0, -15)
-				--child.itemModel:SetCamera(1)
-				--child.itemModel:SetViewTranslation(0.2, 0.2)
-				--child.itemModel:Show()
-			--end
-		end
-	end
+            -- Set model adjustments based on the slot
+            if (currentSlot == PLAYER_VISIBLE_ITEM_1_ENTRYID) then -- Head
+                child.itemModel:SetPoint("CENTER", 0, 0)
+                child.itemModel:SetRotation(90, false)
+                child.itemModel:SetCamera(0)
+                child.itemModel:SetScale(1.0)  -- Set scale for Head
+            elseif (currentSlot == PLAYER_VISIBLE_ITEM_3_ENTRYID) then -- Shoulder
+                child.itemModel:SetPoint("CENTER", 1, 0)
+                child.itemModel:SetRotation(45, true)
+                child.itemModel:SetCamera(1)
+                child.itemModel:SetScale(3)  -- Set scale for Shoulder
+				child.itemModel:SetFacing(-0.6)
+            elseif (currentSlot == PLAYER_VISIBLE_ITEM_4_ENTRYID) then -- Shirt
+                child.itemModel:SetPoint("CENTER", 0, 0)
+                child.itemModel:SetRotation(90, false)
+                child.itemModel:SetCamera(1)
+                child.itemModel:SetScale(1.0)  -- Set scale for Shirt
+            elseif (currentSlot == PLAYER_VISIBLE_ITEM_5_ENTRYID) then -- Chest
+                child.itemModel:SetPoint("CENTER", 0, 0)
+                child.itemModel:SetRotation(90, false)
+                child.itemModel:SetCamera(1)
+                child.itemModel:SetScale(1.2)  -- Set scale for Chest
+            elseif (currentSlot == PLAYER_VISIBLE_ITEM_6_ENTRYID) then -- Waist
+                child.itemModel:SetPoint("CENTER", 0, 0)
+                child.itemModel:SetRotation(90, false)
+                child.itemModel:SetCamera(1)
+                child.itemModel:SetScale(0.9)  -- Set scale for Waist
+            elseif (currentSlot == PLAYER_VISIBLE_ITEM_7_ENTRYID) then -- Legs
+                child.itemModel:SetPoint("CENTER", 0, 0)
+                child.itemModel:SetRotation(90, false)
+                child.itemModel:SetCamera(1)
+                child.itemModel:SetScale(1.1)  -- Set scale for Legs
+            elseif (currentSlot == PLAYER_VISIBLE_ITEM_8_ENTRYID) then -- Feet
+                child.itemModel:SetPoint("CENTER", 0, 0)
+                child.itemModel:SetRotation(90, false)
+                child.itemModel:SetCamera(1)
+                child.itemModel:SetScale(1.0)  -- Set scale for Feet
+            elseif (currentSlot == PLAYER_VISIBLE_ITEM_9_ENTRYID) then -- Wrist
+                child.itemModel:SetPoint("CENTER", 0, 0)
+                child.itemModel:SetRotation(90, false)
+                child.itemModel:SetCamera(1)
+                child.itemModel:SetScale(1.0)  -- Set scale for Wrist
+            elseif (currentSlot == PLAYER_VISIBLE_ITEM_10_ENTRYID) then -- Hands
+                child.itemModel:SetPoint("CENTER", 0, 0)
+                child.itemModel:SetRotation(90, false)
+                child.itemModel:SetCamera(1)
+                child.itemModel:SetScale(1.1)  -- Set scale for Hands
+            elseif (currentSlot == PLAYER_VISIBLE_ITEM_15_ENTRYID) then -- Back
+                child.itemModel:SetPoint("CENTER", 0, 0)
+                child.itemModel:SetRotation(90, false)
+                child.itemModel:SetCamera(1)
+                child.itemModel:SetScale(1.0)  -- Set scale for Back
+            elseif (currentSlot == PLAYER_VISIBLE_ITEM_16_ENTRYID) then -- Main Hand
+                child.itemModel:SetPoint("CENTER", 0, 0)
+                child.itemModel:SetRotation(90, false)
+                child.itemModel:SetCamera(1)
+                child.itemModel:SetScale(1.0)  -- Set scale for Main Hand
+            elseif (currentSlot == PLAYER_VISIBLE_ITEM_17_ENTRYID) then -- Secondary Hand
+                child.itemModel:SetPoint("CENTER", 0, 0)
+                child.itemModel:SetRotation(90, false)
+                child.itemModel:SetCamera(1)
+                child.itemModel:SetScale(1.0)  -- Set scale for Secondary Hand
+            elseif (currentSlot == PLAYER_VISIBLE_ITEM_18_ENTRYID) then -- Ranged
+                child.itemModel:SetPoint("CENTER", 0, 0)
+                child.itemModel:SetRotation(90, false)
+                child.itemModel:SetCamera(1)
+                child.itemModel:SetScale(1.0)  -- Set scale for Ranged
+            elseif (currentSlot == PLAYER_VISIBLE_ITEM_19_ENTRYID) then -- Tabard
+                child.itemModel:SetPoint("CENTER", 0, 0)
+                child.itemModel:SetRotation(90, false)
+                child.itemModel:SetCamera(1)
+                child.itemModel:SetScale(1.0)  -- Set scale for Tabard
+            else
+                -- Set the rotation of other items to 0
+                child.itemModel:SetRotation(0, false)
+                -- Set default position
+                child.itemModel:SetPoint("CENTER", 0, -15)
+                -- Set default zoom (0 is default zoom level)
+                child.itemModel:SetCamera(1)  -- Adjust zoom level for other items
+                -- Set default scale for other items
+                child.itemModel:SetScale(1.0)
+            end
+        end
+    end
 end
 
 function SetSearchTab()

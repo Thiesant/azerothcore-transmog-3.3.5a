@@ -26,6 +26,8 @@ local PLAYER_VISIBLE_ITEM_18_ENTRYID  = 317
 local PLAYER_VISIBLE_ITEM_19_ENTRYID  = 319
 
 local UNUSABLE_INVENTORY_TYPES = {[2] = true, [11] = true, [12] = true, [18] = true, [24] = true, [27] = true, [28] = true}
+-- use .recovertransmog in game to recover missing rewarded transmog from quests
+local RECOVERY_COMMAND = "recovertransmog" -- Change this if you want a different command
 
 function Transmog_CalculateSlot(slot)
 	if (slot == 0) then
@@ -69,6 +71,7 @@ end
 -- lang 
 local LOOT_ITEM_LOCALE = {
     [0] = " has been added to your transmog collection.", -- en
+    [2] = " a été ajouté à votre collection de transmogrification.", -- fr
     [3] = " wurde deiner Transmog-Sammlung hinzugefügt.", -- de
 }
 
@@ -82,20 +85,27 @@ function TransmogHandlers.LootItemLocale(player, item, count, locale)
     if (class == 2 or class == 4 ) and not UNUSABLE_INVENTORY_TYPES[inventoryType] then
         -- Transmogs are unlocked on account level!
         local displayId = itemTemplate:GetDisplayId()
-        local itemName = itemTemplate:GetName()
-
-        itemName = itemName:gsub("'", "''")
-        AuthDBQuery("INSERT IGNORE INTO `account_transmog` (`account_id`, `unlocked_item_id`, `display_id`, `inventory_type`, `item_name`) VALUES (" .. accountGUID .. ", " .. itemId .. ", " .. displayId .. ", " .. inventoryType .. ", '" .. itemName .. "');")
-        local locItemName = itemTemplate:GetName(locale)
-
-        if locItemName == nil then
-            locItemName = itemTemplate:GetName(0)
-        end
-
-        local itemLink = "|cffff80ff|Hitem:" .. itemId .. ":0:0:0:0:0:0:0:0|h[" .. locItemName .. "]|h|r"
-        local message = itemLink .. (LOOT_ITEM_LOCALE[locale] or LOOT_ITEM_LOCALE[0])
-        player:SendBroadcastMessage(message)
-    end
+        local itemName = itemTemplate:GetName():gsub("'", "''")
+		
+		-- **Check if the item is already unlocked**
+		local checkQuery = AuthDBQuery("SELECT COUNT(*) FROM account_transmog WHERE account_id = " .. accountGUID .. " AND unlocked_item_id = " .. itemId .. ";")
+		if checkQuery and checkQuery:GetUInt32(0) > 0 then
+		    return -- Item already unlocked, no need to add or send message again
+		end
+		
+		-- Insert new unlocked item
+		AuthDBQuery("INSERT IGNORE INTO `account_transmog` (`account_id`, `unlocked_item_id`, `display_id`, `inventory_type`, `item_name`) VALUES (" 
+		    .. accountGUID .. ", " .. itemId .. ", " .. displayId .. ", " .. inventoryType .. ", '" .. itemName .. "');")
+		
+		-- Register the item client-side
+		AIO.Handle(player, "TransmogTooltip", "RegisterUnlockedItem", itemId)
+		
+		-- Send notification once
+		local locItemName = itemTemplate:GetName(locale) or itemTemplate:GetName(0)
+		local itemLink = "|cffff80ff|Hitem:" .. itemId .. ":0:0:0:0:0:0:0:0|h[" .. locItemName .. "]|h|r"
+		local message = itemLink .. (LOOT_ITEM_LOCALE[locale] or LOOT_ITEM_LOCALE[0])
+		player:SendBroadcastMessage(message)
+	end
 end
 
 function Transmog_OnLootItem(event, player, item, count)
@@ -115,6 +125,7 @@ function Transmog_OnEquipItem(event, player, item, bag, slot)
 		local itemName = item:GetName()
 		itemName = itemName:gsub("'", "''")
 		AuthDBQuery("INSERT IGNORE INTO `account_transmog` (`account_id`, `unlocked_item_id`, `display_id`, `inventory_type`, `item_name`) VALUES ("..accountGUID..", "..itemId..", "..displayId..", "..inventoryType..", '"..itemName.."');") -- ON DUPLICATE KEY UPDATE account_id = VALUES(account_id), display_id = VALUES(display_id), inventory_type = VALUES(inventory_type), item_name = VALUES(item_name)
+		AIO.Handle(player, "TransmogTooltip", "RegisterUnlockedItem", itemId)
 		local constSlot = Transmog_CalculateSlot(slot)
 		
 		CharDBQuery("INSERT INTO character_transmog (`player_guid`, `slot`, `real_item`) VALUES ("..playerGUID..", '"..constSlot.."', "..itemId..") ON DUPLICATE KEY UPDATE real_item = VALUES(real_item);")
@@ -131,6 +142,112 @@ function Transmog_OnEquipItem(event, player, item, bag, slot)
 		
 		player:SetUInt32Value(constSlot, transmogItem)
 	end
+end
+
+function TransmogHandlers.RecoverQuestTransmogs(player)
+    local accountGUID = player:GetAccountId()
+
+    -- Query all REWARDED quests for all characters on the account
+    local completedQuestsQuery = CharDBQuery("SELECT DISTINCT quest FROM character_queststatus_rewarded WHERE guid IN (SELECT guid FROM characters WHERE account = " .. accountGUID .. ");")
+
+    if not completedQuestsQuery then
+        player:SendBroadcastMessage("No rewarded quests found for your account.")
+        return
+    end
+
+    local recoveredItems = {}
+
+    repeat
+        local questId = completedQuestsQuery:GetUInt32(0)
+
+        -- Get all possible rewards for the rewarded quest
+        local rewardsQuery = WorldDBQuery("SELECT RewardChoiceItemID1, RewardChoiceItemID2, RewardChoiceItemID3, RewardChoiceItemID4, RewardChoiceItemID5, RewardChoiceItemID6, RewardItem1, RewardItem2, RewardItem3, RewardItem4 FROM quest_template WHERE ID = " .. questId .. ";")
+
+        if rewardsQuery then
+            local rewardItems = {}
+
+            -- Collect Choice Rewards (RewardChoiceItemID1-6)
+            for i = 0, 5 do
+                local itemId = rewardsQuery:GetUInt32(i)
+                if itemId and itemId > 0 then
+                    table.insert(rewardItems, itemId)
+                end
+            end
+
+            -- Collect Guaranteed Rewards (RewardItem1-4)
+            for i = 6, 9 do
+                local itemId = rewardsQuery:GetUInt32(i)
+                if itemId and itemId > 0 then
+                    table.insert(rewardItems, itemId)
+                end
+            end
+
+            -- Filter out only transmog-eligible items
+            local transmogItems = {}
+            for _, itemId in ipairs(rewardItems) do
+                local itemTemplate = GetItemTemplate(itemId)
+                if itemTemplate then
+                    local class = itemTemplate:GetClass()
+                    local inventoryType = itemTemplate:GetInventoryType()
+                    if (class == 2 or class == 4) and not UNUSABLE_INVENTORY_TYPES[inventoryType] then
+                        table.insert(transmogItems, itemId)
+                    end
+                end
+            end
+
+            -- Check which transmog-eligible items are missing from `account_transmog`
+            if #transmogItems > 0 then
+                local itemIdList = table.concat(transmogItems, ", ")
+
+                -- Query to check which items are already unlocked
+                local existingItemsQuery = AuthDBQuery("SELECT unlocked_item_id FROM account_transmog WHERE account_id = " .. accountGUID .. " AND unlocked_item_id IN (" .. itemIdList .. ");")
+
+                -- Store already unlocked items
+                local unlockedItems = {}
+                if existingItemsQuery then
+                    repeat
+                        local unlockedItemId = existingItemsQuery:GetUInt32(0)
+                        unlockedItems[unlockedItemId] = true
+                    until not existingItemsQuery:NextRow()
+                end
+
+                -- Identify missing transmog rewards
+                local missingRewards = {}
+                for _, itemId in ipairs(transmogItems) do
+                    if not unlockedItems[itemId] then
+                        table.insert(missingRewards, itemId)
+                    end
+                end
+
+                -- Unlock only missing items
+                for _, itemId in ipairs(missingRewards) do
+                    local itemTemplate = GetItemTemplate(itemId)
+                    if itemTemplate then
+                        local displayId = itemTemplate:GetDisplayId()
+                        local inventoryType = itemTemplate:GetInventoryType()
+                        local itemName = itemTemplate:GetName():gsub("'", "''")
+
+                        -- Insert missing item into `account_transmog`
+                        AuthDBQuery("INSERT IGNORE INTO `account_transmog` (`account_id`, `unlocked_item_id`, `display_id`, `inventory_type`, `item_name`) VALUES (" 
+                            .. accountGUID .. ", " .. itemId .. ", " .. displayId .. ", " .. inventoryType .. ", '" .. itemName .. "');")
+
+                        -- Register the item in tooltip
+                        AIO.Handle(player, "TransmogTooltip", "RegisterUnlockedItem", itemId)
+
+                        -- Store in recovered list for notification
+                        table.insert(recoveredItems, itemId)
+                    end
+                end
+            end
+        end
+    until not completedQuestsQuery:NextRow()
+
+    -- Notify player about recovered transmogs
+    if #recoveredItems > 0 then
+        player:SendBroadcastMessage("Recovered " .. #recoveredItems .. " missing transmog items from completed quests.")
+    else
+        player:SendBroadcastMessage("No missing transmog-eligible rewards found in your completed quests.")
+    end
 end
 
 -- Todo add lua/c++ function for unequip!!
@@ -350,7 +467,7 @@ end
 
 function TransmogHandlers.SetSearchCurrentSlotItemIds(player, slot, page, search)
 	-- Ensure search is not empty or nil
-	if ( search == nil or serach == '' ) then
+	if ( search == nil or search == '' ) then
 		return;
 	end
 
@@ -444,3 +561,9 @@ RegisterPlayerEvent(53, Transmog_OnLootItem)
 RegisterPlayerEvent(56, Transmog_OnLootItem)
 RegisterPlayerEvent(29, Transmog_OnEquipItem)
 RegisterPlayerEvent(3, Transmog_OnLogin)
+RegisterPlayerEvent(42, function(event, player, command)
+    if command == RECOVERY_COMMAND then
+        TransmogHandlers.RecoverQuestTransmogs(player)
+        return false -- Prevents default handling of the command
+    end
+end)

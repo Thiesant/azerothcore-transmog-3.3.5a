@@ -140,6 +140,12 @@ end)
 GameTooltip:HookScript("OnTooltipSetItem", function(tooltip, ...)
 	local name, link = tooltip:GetItem()
 	local ownerFrame, anchor = tooltip:GetOwner()
+	
+	-- Check if ownerFrame is valid
+	if not ownerFrame then
+		return  -- If ownerFrame is nil, just return and do nothing
+	end
+	
 	local slotName = ownerFrame:GetName()
 	if ( currentTooltipSlot == slotName ) then
 		return;
@@ -505,6 +511,7 @@ end
 local CLIENT_FALLBACK_LANG = 0
 local LANG_ID_TABLE = {
     ["enUS"] = 0,
+    ["frFR"] = 2,
     ["deDE"] = 3,
 }
 

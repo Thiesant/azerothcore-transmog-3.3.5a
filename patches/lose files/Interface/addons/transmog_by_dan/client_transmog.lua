@@ -11,6 +11,26 @@ local function OnEvent(self, event)
 	AIO.Handle("Transmog", "LoadPlayer")
 end
 
+-- language support
+-- fallback = enUS
+local CLIENT_FALLBACK_LANG = 0
+local LANG_ID_TABLE = {
+    ["enUS"] = 0,
+    ["frFR"] = 2,
+    ["deDE"] = 3,
+    ["esES"] = 6,
+    ["ruRU"] = 8,
+}
+
+local function HandleLocale()
+    local langId = LANG_ID_TABLE[GetLocale()]
+    if not langId then
+        langId = CLIENT_FALLBACK_LANG
+    end
+
+    return langId
+end
+
 local f = CreateFrame("Frame")
 f:RegisterEvent("PLAYER_ENTERING_WORLD")
 f:SetScript("OnEvent", OnEvent)
@@ -107,7 +127,6 @@ local morePages = false
 local itemButtons = {}
 local currentTooltipSlot = nil
 local isInputHovered = false
-
 
 -- TODO Add spam preventing measures
 
@@ -252,63 +271,247 @@ function OnLeaveHideToolTip(btn)
 	GameTooltip:Hide()
 end
 
-local function OnEnterItemToolTip(btn)
-	local itemId = btn:GetID()
-	GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-	GameTooltip:SetHyperlink("item:"..itemId..":0:0:0:0:0:0:0")
-	GameTooltip:AddLine(" ")
-	GameTooltip:AddLine("Click to preview this item.", 0, 1, 0)
-	GameTooltip:Show()
+local PREVIEW_ITEM_TOOLTIP_TEXTS = {
+    [0] = "Click to preview this item.",  -- enUS
+    [2] = "Cliquez pour prévisualiser cet objet.",  -- frFR
+    [3] = "Klicken, um dieses Objekt anzusehen.", -- deDE
+    [6] = "Haz clic para previsualizar este objeto.",  -- esES
+    [8] = "Нажмите, чтобы предварительно просмотреть этот предмет.", -- ruRU
+}
+
+function OnEnterItemToolTip(btn)
+    local localeID = HandleLocale()
+    GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+    GameTooltip:SetHyperlink("item:"..btn:GetID()..":0:0:0:0:0:0:0")
+    GameTooltip:AddLine(" ")
+    GameTooltip:AddLine(PREVIEW_ITEM_TOOLTIP_TEXTS[localeID] or PREVIEW_ITEM_TOOLTIP_TEXTS[0], 0, 1, 0)  -- Click to preview text
+    GameTooltip:Show()
 end
+
+local TRANSMOGRIFY_TOOLTIP_TEXTS = {
+    [0] = "Transmogrify",  -- enUS
+    [2] = "Transmogrifier", -- frFR
+    [3] = "Transmogrifizieren", -- deDE
+    [6] = "Transfigurar", -- esES
+    [8] = "Трансмогрификация", -- ruRU
+}
+
+local TRANSMOGRIFY_TOOLTIP_DESC = {
+    [0] = "Click to transmogrify the selected item.",  -- enUS
+    [2] = "Cliquez pour transmogrifier l'objet sélectionné.", -- frFR
+    [3] = "Klicke, um den ausgewählten Gegenstand zu transmogrifizieren.", -- deDE
+    [6] = "Haz clic para transmogrificar el objeto seleccionado.", -- esES
+    [8] = "Нажмите, чтобы трансмогрифицировать выбранный предмет.", -- ruRU
+}
 
 function TransmogrifyToolTip(btn)
-	GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-	GameTooltip:AddLine("Transmogrify", 1, 1, 1)
-	GameTooltip:Show()
+    local localeID = HandleLocale()
+    GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+    GameTooltip:AddLine(TRANSMOGRIFY_TOOLTIP_TEXTS[localeID] or TRANSMOGRIFY_TOOLTIP_TEXTS[0], 1, 1, 1)
+    GameTooltip:AddLine(TRANSMOGRIFY_TOOLTIP_DESC[localeID] or TRANSMOGRIFY_TOOLTIP_DESC[0], 1, 0.8, 0)
+    GameTooltip:Show()
 end
+
+local RESTORE_ITEM_TOOLTIP_TEXTS = {
+    [0] = "Restore Item Appearance",  -- enUS
+    [2] = "Restaurer l'apparence de l'objet", -- frFR
+    [3] = "Gegenstandsappearance wiederherstellen", -- deDE
+    [6] = "Restaurar apariencia del objeto", -- esES
+    [8] = "Восстановить внешний вид предмета", -- ruRU
+}
+
+local RESTORE_ITEM_TOOLTIP_DESC = {
+    [0] = "Click to restore this item's appearance.",  -- enUS
+    [2] = "Cliquez pour restaurer l'apparence de cet objet.", -- frFR
+    [3] = "Klicke, um das Aussehen dieses Gegenstands wiederherzustellen.", -- deDE
+    [6] = "Haz clic para restaurar la apariencia de este objeto.", -- esES
+    [8] = "Нажмите, чтобы восстановить внешний вид этого предмета.", -- ruRU
+}
 
 function RestoreItemToolTip(btn)
-	GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-	GameTooltip:AddLine("Restore Item Appearance", 1, 1, 1)
-	GameTooltip:Show()
+    local localeID = HandleLocale()
+    GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+    GameTooltip:AddLine(RESTORE_ITEM_TOOLTIP_TEXTS[localeID] or RESTORE_ITEM_TOOLTIP_TEXTS[0], 1, 1, 1)
+    GameTooltip:AddLine(RESTORE_ITEM_TOOLTIP_DESC[localeID] or RESTORE_ITEM_TOOLTIP_DESC[0], 1, 0.8, 0)
+    GameTooltip:Show()
 end
+
+
+local HIDE_ITEM_TOOLTIP_TEXTS = {
+    [0] = "Hide Item",          -- enUS
+    [2] = "Cacher l'objet",     -- frFR
+    [3] = "Gegenstand verbergen", -- deDE
+    [6] = "Ocultar objeto",     -- esES
+    [8] = "Скрыть предмет",     -- ruRU
+}
+
+local HIDE_ITEM_TOOLTIP_DESC = {
+    [0] = "Click to hide this item.",  -- enUS
+    [2] = "Cliquez pour cacher cet objet.",  -- frFR
+    [3] = "Klicken, um diesen Gegenstand zu verstecken.", -- deDE
+    [6] = "Haz clic para ocultar este objeto.",  -- esES
+    [8] = "Нажмите, чтобы скрыть этот предмет.", -- ruRU
+}
 
 function HideItemToolTip(btn)
-	GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-	GameTooltip:AddLine("Hide Item", 1, 1, 1)
-	GameTooltip:Show()
+    local localeID = HandleLocale()
+    GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+    GameTooltip:AddLine(HIDE_ITEM_TOOLTIP_TEXTS[localeID] or HIDE_ITEM_TOOLTIP_TEXTS[0], 1, 1, 1)
+    GameTooltip:AddLine(HIDE_ITEM_TOOLTIP_DESC[localeID] or HIDE_ITEM_TOOLTIP_DESC[0], 1, 0.8, 0)
+    GameTooltip:Show()
 end
+
+local RESTORE_ALL_ITEMS_TOOLTIP_TEXTS = {
+    [0] = "Restore All Items",  -- enUS
+    [2] = "Restaurer tous les objets", -- frFR
+    [3] = "Alle Gegenstände wiederherstellen", -- deDE
+    [6] = "Restaurar todos los objetos", -- esES
+    [8] = "Восстановить все предметы", -- ruRU
+}
+
+local RESTORE_ALL_ITEMS_TOOLTIP_DESC = {
+    [0] = "Click to restore all hidden items to their original state.",  -- enUS
+    [2] = "Cliquez pour restaurer tous les objets cachés à leur état d'origine.", -- frFR
+    [3] = "Klicke, um alle versteckten Gegenstände in ihren Originalzustand wiederherzustellen.", -- deDE
+    [6] = "Haz clic para restaurar todos los objetos ocultos a su estado original.", -- esES
+    [8] = "Нажмите, чтобы восстановить все скрытые предметы в их исходное состояние.", -- ruRU
+}
 
 function RestoreAllItemsToolTip(btn)
-	GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-	GameTooltip:AddLine("Restore All Item Appearances", 1, 1, 1)
-	GameTooltip:Show()
+    local localeID = HandleLocale()
+    GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+    GameTooltip:AddLine(RESTORE_ALL_ITEMS_TOOLTIP_TEXTS[localeID] or RESTORE_ALL_ITEMS_TOOLTIP_TEXTS[0], 1, 1, 1)
+    GameTooltip:AddLine(RESTORE_ALL_ITEMS_TOOLTIP_DESC[localeID] or RESTORE_ALL_ITEMS_TOOLTIP_DESC[0], 1, 0.8, 0)
+    GameTooltip:Show()
 end
+
+
+local HIDE_ALL_ITEMS_TOOLTIP_TEXTS = {
+    [0] = "Hide All Items",  -- enUS
+    [2] = "Cacher tous les objets", -- frFR
+    [3] = "Alle Gegenstände verbergen", -- deDE
+    [6] = "Ocultar todos los objetos", -- esES
+    [8] = "Скрыть все предметы", -- ruRU
+}
+
+local HIDE_ALL_ITEMS_TOOLTIP_DESC = {
+    [0] = "Click to hide all equipped items.",  -- enUS
+    [2] = "Cliquez pour cacher tous les objets équipés.", -- frFR
+    [3] = "Klicke, um alle ausgerüsteten Gegenstände zu verbergen.", -- deDE
+    [6] = "Haz clic para ocultar todos los objetos equipados.", -- esES
+    [8] = "Нажмите, чтобы скрыть все экипированные предметы.", -- ruRU
+}
 
 function HideAllItemsToolTip(btn)
-	GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-	GameTooltip:AddLine("Hide All Items", 1, 1, 1)
-	GameTooltip:Show()
+    local localeID = HandleLocale()
+    GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+    GameTooltip:AddLine(HIDE_ALL_ITEMS_TOOLTIP_TEXTS[localeID] or HIDE_ALL_ITEMS_TOOLTIP_TEXTS[0], 1, 1, 1)
+    GameTooltip:AddLine(HIDE_ALL_ITEMS_TOOLTIP_DESC[localeID] or HIDE_ALL_ITEMS_TOOLTIP_DESC[0], 1, 0.8, 0)
+    GameTooltip:Show()
 end
+
+
+local SHOW_CLOAK_TOOLTIP_TEXTS = {
+    [0] = "Toggle Character Cloak Display",        -- enUS
+    [2] = "Basculer l'affichage de la cape",      -- frFR
+    [3] = "Schalter für den Charakterumhang",     -- deDE
+    [6] = "Alternar la visualización de capa",    -- esES
+    [8] = "Переключить отображение плаща",        -- ruRU
+}
+
+local SHOW_CLOAK_TOOLTIP_DESC = {
+    [0] = "This checkbox provides the same function as",   -- enUS
+    [2] = "Cette case à cocher fournit la même fonction que", -- frFR
+    [3] = "Dieses Kontrollkästchen bietet die gleiche Funktion wie", -- deDE
+    [6] = "Esta casilla de verificación proporciona la misma función que", -- esES
+    [8] = "Этот флажок выполняет ту же функцию, что и", -- ruRU
+}
+
+local SHOW_CLOAK_TOOLTIP_EXTRA = {
+    [0] = "ticking or unticking the \"Show Cloak\" checkbox",   -- enUS
+    [2] = "cocher ou décocher la case \"Afficher la cape\"", -- frFR
+    [3] = "An- oder Abwählen des Kontrollkästchens \"Umhang anzeigen\"", -- deDE
+    [6] = "marcar o desmarcar la casilla \"Mostrar capa\"", -- esES
+    [8] = "отметка или снятие отметки с флажка \"Показать плащ\"", -- ruRU
+}
+
+local SHOW_CLOAK_TOOLTIP_EFFECT = {
+    [0] = "in the interface options menu. It will have no", -- enUS
+    [2] = "dans le menu des options de l'interface. Cela n'aura aucun", -- frFR
+    [3] = "im Menü der Interface-Optionen. Es hat keine", -- deDE
+    [6] = "en el menú de opciones de la interfaz. No tendrá ningún", -- esES
+    [8] = "в меню параметров интерфейса. Это не окажет", -- ruRU
+}
+
+local SHOW_CLOAK_TOOLTIP_FINAL = {
+    [0] = "effect on the transmogrify preview window.",  -- enUS
+    [2] = "effet sur la fenêtre de prévisualisation de transmogrification.", -- frFR
+    [3] = "Auswirkungen auf das Vorschaufenster für Transmogrifikation.", -- deDE
+    [6] = "efecto en la ventana de vista previa de transfiguración.", -- esES
+    [8] = "влияния на окно предварительного просмотра трансмогрификации.", -- ruRU
+}
+
 
 function ShowCloakToolTip(btn)
+	local localeID = HandleLocale()
 	GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-	GameTooltip:AddLine("Toggle Character Cloak Display", 1, 1, 1)
-	GameTooltip:AddLine("This checkbox provides the same function as", 1, 0.8, 0)
-	GameTooltip:AddLine("ticking or unticking the \"Show Cloak\" checkbox", 1, 0.8, 0)
-	GameTooltip:AddLine("in the interface options menu. It will have no", 1, 0.8, 0)
-	GameTooltip:AddLine("effect on the transmogrify preview window.", 1, 0.8, 0)
+	GameTooltip:AddLine(SHOW_CLOAK_TOOLTIP_TEXTS[localeID] or SHOW_CLOAK_TOOLTIP_TEXTS[0], 1, 1, 1)
+	GameTooltip:AddLine(SHOW_CLOAK_TOOLTIP_DESC[localeID] or SHOW_CLOAK_TOOLTIP_DESC[0], 1, 0.8, 0)
+	GameTooltip:AddLine(SHOW_CLOAK_TOOLTIP_EXTRA[localeID] or SHOW_CLOAK_TOOLTIP_EXTRA[0], 1, 0.8, 0)
+	GameTooltip:AddLine(SHOW_CLOAK_TOOLTIP_EFFECT[localeID] or SHOW_CLOAK_TOOLTIP_EFFECT[0], 1, 0.8, 0)
+	GameTooltip:AddLine(SHOW_CLOAK_TOOLTIP_FINAL[localeID] or SHOW_CLOAK_TOOLTIP_FINAL[0], 1, 0.8, 0)
 	GameTooltip:Show()
 end
 
+local SHOW_HELM_TOOLTIP_TEXTS = {
+    [0] = "Toggle Character Helm Display",        -- enUS
+    [2] = "Basculer l'affichage du casque",      -- frFR
+    [3] = "Schalter für die Charakterhelmanzeige", -- deDE
+    [6] = "Alternar la visualización del casco", -- esES
+    [8] = "Переключить отображение шлема",       -- ruRU
+}
+
+local SHOW_HELM_TOOLTIP_DESC = {
+    [0] = "This checkbox provides the same function as",   -- enUS
+    [2] = "Cette case à cocher fournit la même fonction que", -- frFR
+    [3] = "Dieses Kontrollkästchen bietet die gleiche Funktion wie", -- deDE
+    [6] = "Esta casilla de verificación proporciona la misma función que", -- esES
+    [8] = "Этот флажок выполняет ту же функцию, что и", -- ruRU
+}
+
+local SHOW_HELM_TOOLTIP_EXTRA = {
+    [0] = "ticking or unticking the \"Show Helm\" checkbox",   -- enUS
+    [2] = "cocher ou décocher la case \"Afficher le casque\"", -- frFR
+    [3] = "An- oder Abwählen des Kontrollkästchens \"Helm anzeigen\"", -- deDE
+    [6] = "marcar o desmarcar la casilla \"Mostrar casco\"", -- esES
+    [8] = "отметка или снятие отметки с флажка \"Показать шлем\"", -- ruRU
+}
+
+local SHOW_HELM_TOOLTIP_EFFECT = {
+    [0] = "in the interface options menu. It will have no", -- enUS
+    [2] = "dans le menu des options de l'interface. Cela n'aura aucun", -- frFR
+    [3] = "im Menü der Interface-Optionen. Es hat keine", -- deDE
+    [6] = "en el menú de opciones de la interfaz. No tendrá ningún", -- esES
+    [8] = "в меню параметров интерфейса. Это не окажет", -- ruRU
+}
+
+local SHOW_HELM_TOOLTIP_FINAL = {
+    [0] = "effect on the transmogrify preview window.",  -- enUS
+    [2] = "effet sur la fenêtre de prévisualisation de transmogrification.", -- frFR
+    [3] = "Auswirkungen auf das Vorschaufenster für Transmogrifikation.", -- deDE
+    [6] = "efecto en la ventana de vista previa de transfiguración.", -- esES
+    [8] = "влияния на окно предварительного просмотра трансмогрификации.", -- ruRU
+}
+
 function ShowHelmToolTip(btn)
-	GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-	GameTooltip:AddLine("Toggle Character Helm Display", 1, 1, 1)
-	GameTooltip:AddLine("This checkbox provides the same function as", 1, 0.8, 0)
-	GameTooltip:AddLine("ticking or unticking the \"Show Helm\" checkbox", 1, 0.8, 0)
-	GameTooltip:AddLine("in the interface options menu. It will have no", 1, 0.8, 0)
-	GameTooltip:AddLine("effect on the transmogrify preview window.", 1, 0.8, 0)
-	GameTooltip:Show()
+    local localeID = HandleLocale()  -- Récupère la langue du client
+    GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+    GameTooltip:AddLine(SHOW_HELM_TOOLTIP_TEXTS[localeID] or SHOW_HELM_TOOLTIP_TEXTS[0], 1, 1, 1)  -- Affiche le titre
+    GameTooltip:AddLine(SHOW_HELM_TOOLTIP_DESC[localeID] or SHOW_HELM_TOOLTIP_DESC[0], 1, 0.8, 0)  -- Première ligne de description
+    GameTooltip:AddLine(SHOW_HELM_TOOLTIP_EXTRA[localeID] or SHOW_HELM_TOOLTIP_EXTRA[0], 1, 0.8, 0)  -- Deuxième ligne de description
+    GameTooltip:AddLine(SHOW_HELM_TOOLTIP_EFFECT[localeID] or SHOW_HELM_TOOLTIP_EFFECT[0], 1, 0.8, 0)  -- Troisième ligne de description
+    GameTooltip:AddLine(SHOW_HELM_TOOLTIP_FINAL[localeID] or SHOW_HELM_TOOLTIP_FINAL[0], 1, 0.8, 0)  -- Dernière ligne de description
+    GameTooltip:Show()
 end
 
 local function InitTabSlots()
@@ -514,23 +717,23 @@ function TransmogHandlers.LoadTransmogsAfterSave(player)
 	LoadTransmogsFromCurrentIds()
 end
 
--- language support
--- fallback = enUS
-local CLIENT_FALLBACK_LANG = 0
-local LANG_ID_TABLE = {
-    ["enUS"] = 0,
-    ["frFR"] = 2,
-    ["deDE"] = 3,
+local RECOVER_TOOLTIP_TEXT = {
+    [0] = "Recover transmogs from quests with multiple-choice rewards.",                    -- enUS
+    [2] = "Récupérer les transmogrifications des quêtes à récompenses à choix multiple.",   -- frFR
+    [3] = "Transmogs aus Quests mit mehreren Belohnungsoptionen wiederherstellen.",         -- deDE
+    [6] = "Recuperar transfiguraciones de misiones con recompensas de elección múltiple.",  -- esES
+    [8] = "Восстановить трансмоги из заданий с выбором награды."                            -- ruRU
 }
-
-local function HandleLocale()
-    local langId = LANG_ID_TABLE[GetLocale()]
-    if not langId then
-        langId = CLIENT_FALLBACK_LANG
-    end
-
-    return langId
-end
+local RECOVER_TOOLTIP_DESCRIPTION = {
+    [0] = "Click to recover quest appearance rewards.",
+    [2] = "Cliquez pour récupérer les apparences de quêtes.",
+    [3] = "Klicke, um Quest-Transmogs wiederherzustellen.",
+    [6] = "Haz clic para recuperar apariencias de misiones.",
+    [8] = "Нажмите, чтобы восстановить трансмоги из заданий."
+}
+local localeID = HandleLocale()
+RecoverTransmogTooltipTitle = RECOVER_TOOLTIP_TEXT[localeID] or RECOVER_TOOLTIP_TEXT[0]
+RecoverTransmogTooltipDesc  = RECOVER_TOOLTIP_DESCRIPTION[localeID]  or RECOVER_TOOLTIP_DESCRIPTION[0]
 
 function TransmogHandlers.GetLocale(player, item, count)
     AIO.Handle("Transmog", "LootItemLocale", item, count, HandleLocale())
@@ -552,9 +755,18 @@ local function TransmogTabTooltip(btn)
 	GameTooltip:Show()
 end
 
+local PAGE_TEXTS = {
+    [0] = "Page %d",         -- enUS
+    [2] = "Page %d",         -- frFR
+    [3] = "Seite %d",        -- deDE
+    [6] = "Página %d",       -- esES
+    [8] = "Страница %d",     -- ruRU
+}
+
 function TransmogHandlers.InitTab(player, newSlotItemIds, page, hasMorePages)
+	local localeID = HandleLocale()
 	currentSlotItemIds = newSlotItemIds
-	TransmogPaginationText:SetText("Page "..page)
+	 TransmogPaginationText:SetText(string.format(PAGE_TEXTS[localeID] or PAGE_TEXTS[0], page))
 	
 	if ( hasMorePages ) then
 		RightButton:Enable()
@@ -884,7 +1096,58 @@ function TransmogModelMouseRotation(modelFrame)
 end
 
 function OnTransmogFrameLoad(self)
-	ItemSearchInput:SetText("|cff808080Filter Item Appearance|r")
+	local localeID = HandleLocale()
+	local TITLE_TEXTS = {
+		[0] = "Transmogrify",
+		[2] = "Transmogrifier",
+		[3] = "Transmogrifizieren",
+		[6] = "Transfigurar",
+		[8] = "Трансмогрификация"
+	}
+	if TransmogFrame.TitleText then
+	TransmogFrame.TitleText:SetText(TITLE_TEXTS[localeID] or TITLE_TEXTS[0])
+	end
+	local SUBTITLE_TEXTS = {
+		[0] = "Collected Item Appearances",
+		[2] = "Apparences d'objets collectées",
+		[3] = "Gesammelte Gegenstands-Transmogs",
+		[6] = "Apariencias de objetos recogidas",
+		[8] = "Собранные внешности предметов"
+	}
+	
+	if TransmogFrame.SubtitleText then
+		TransmogFrame.SubtitleText:SetText(SUBTITLE_TEXTS[localeID] or SUBTITLE_TEXTS[0])
+	end
+	local SHOW_CLOAK_TEXTS = {
+    [0] = "Show Cloak",        -- enUS
+    [2] = "Montrer cape",   -- frFR
+    [3] = "Cloak anzeigen",    -- deDE
+    [6] = "Mostrar capa",      -- esES
+    [8] = "Показать плащ",     -- ruRU
+	}
+    if ShowCloakText then
+        ShowCloakText:SetText(SHOW_CLOAK_TEXTS[localeID] or SHOW_CLOAK_TEXTS[0])
+    end
+	local SHOW_HELM_TEXTS = {
+    [0] = "Show Helm",        -- enUS
+    [2] = "Montrer casque",-- frFR
+    [3] = "Helm anzeigen",    -- deDE
+    [6] = "Mostrar casco",    -- esES
+    [8] = "Показать шлем",    -- ruRU
+	}
+	if ShowHelmText then
+    ShowHelmText:SetText(SHOW_HELM_TEXTS[localeID] or SHOW_HELM_TEXTS[0])
+	end
+	local SEARCH_PLACEHOLDER_TEXTS = {
+	[0] = "Filter Item Appearance",
+	[2] = "Filtrer une apparence",
+	[3] = "Aussehen filtern",
+	[6] = "Filtrar apariencia",
+	[8] = "Фильтр внешности"
+}
+	 if ItemSearchInput then
+        ItemSearchInput:SetText("|cff808080" .. (SEARCH_PLACEHOLDER_TEXTS[localeID] or SEARCH_PLACEHOLDER_TEXTS[0]) .. "|r")
+    end
 	ItemSearchInput:SetScript("OnEnterPressed", SetSearchTab)
 	
 	InitTabSlots()
@@ -933,7 +1196,6 @@ function OnClickTransmogButton(self)
 	characterTransmogTab:SetChecked(true)
 	isInputHovered = false
 	AIO.Handle("Transmog", "SetCurrentSlotItemIds", currentSlot, 1)
-	ItemSearchInput:SetText("|cff808080Filter Item Appearance|r")
 	LoadTransmogsFromCurrentIds()
 	ShowCloakCheckBox:SetChecked(ShowingCloak())
 	ShowHelmCheckBox:SetChecked(ShowingHelm())
@@ -971,4 +1233,11 @@ function PaperDollFrame_OnShow(self)
 
 	LoadTransmogsFromCurrentIds()
 	-- end custom code
+end
+
+function RecoverMissingTransmogs()
+	PlaySound("Glyph_MajorCreate", "sfx")
+    -- SendChatMessage(".recovertransmog", "SAY")
+    local locale = HandleLocale()
+    AIO.Handle("Transmog", "RecoverQuestTransmogs", locale)
 end

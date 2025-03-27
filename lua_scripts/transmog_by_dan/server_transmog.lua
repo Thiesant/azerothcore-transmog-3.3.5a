@@ -70,9 +70,34 @@ end
 
 -- lang 
 local LOOT_ITEM_LOCALE = {
-    [0] = " has been added to your transmog collection.", -- en
-    [2] = " a été ajouté à votre collection de transmogrification.", -- fr
-    [3] = " wurde deiner Transmog-Sammlung hinzugefügt.", -- de
+    [0] = " has been added to your transmog collection.",                   -- enUS
+    [2] = " a été ajouté à votre collection de transmogrification.",        -- frFR
+    [3] = " wurde deiner Transmog-Sammlung hinzugefügt.",                   -- deDE
+    [6] = " ha sido añadido a tu colección de transfiguraciones.",          -- esES
+    [8] = " был добавлен в вашу коллекцию трансмогрификации."               -- ruRU
+}
+local RECOVER_MESSAGES = {
+    noQuests = {
+        [0] = "No rewarded quests found for your account.",                                  -- enUS
+        [2] = "Aucune quête à récompenses trouvée pour votre compte.",                       -- frFR
+        [3] = "Keine Belohnungsquests für deinen Account gefunden.",                         -- deDE
+        [6] = "No se encontraron misiones con recompensa en tu cuenta.",                     -- esES
+        [8] = "Для вашей учетной записи не найдено заданий с наградами."                     -- ruRU
+    },
+    noneFound = {
+        [0] = "No missing transmog-eligible rewards found in your completed quests.",                     -- enUS
+        [2] = "Aucune apparence manquante trouvée dans vos quêtes terminées.",                            -- frFR
+        [3] = "Keine fehlenden transmog-fähigen Belohnungen in deinen abgeschlossenen Quests gefunden.",  -- deDE
+        [6] = "No se encontraron apariencias faltantes en tus misiones completadas.",                     -- esES
+        [8] = "Не найдено отсутствующих трансмогов среди завершённых заданий."                            -- ruRU
+    },
+    recovered = {
+        [0] = "Recovered %d missing transmog item(s) from completed quests.",                                -- enUS
+        [2] = "%d objet(s) de transmogrification récupéré(s) depuis les quêtes terminées.",                  -- frFR
+        [3] = "%d fehlende Transmog-Gegenstand/Gegenstände aus abgeschlossenen Quests wiederhergestellt.",   -- deDE
+        [6] = "Se recuperaron %d apariencia(s) de misiones completadas.",                                    -- esES
+        [8] = "Восстановлено предметов трансмогрификации из завершённых заданий: %d."                        -- ruRU
+    }
 }
 
 function TransmogHandlers.LootItemLocale(player, item, count, locale)
@@ -144,14 +169,18 @@ function Transmog_OnEquipItem(event, player, item, bag, slot)
 	end
 end
 
-function TransmogHandlers.RecoverQuestTransmogs(player)
+function TransmogHandlers.RecoverQuestTransmogs(player, locale)
+    local langId = locale or 0
     local accountGUID = player:GetAccountId()
-
+	local messageSent = false
     -- Query all REWARDED quests for all characters on the account
     local completedQuestsQuery = CharDBQuery("SELECT DISTINCT quest FROM character_queststatus_rewarded WHERE guid IN (SELECT guid FROM characters WHERE account = " .. accountGUID .. ");")
 
     if not completedQuestsQuery then
-        player:SendBroadcastMessage("No rewarded quests found for your account.")
+		if not messageSent then
+			player:SendBroadcastMessage(RECOVER_MESSAGES.noQuests[langId] or RECOVER_MESSAGES.noQuests[0])
+			messageSent = true
+		end
         return
     end
 
@@ -243,11 +272,14 @@ function TransmogHandlers.RecoverQuestTransmogs(player)
     until not completedQuestsQuery:NextRow()
 
     -- Notify player about recovered transmogs
-    if #recoveredItems > 0 then
-        player:SendBroadcastMessage("Recovered " .. #recoveredItems .. " missing transmog items from completed quests.")
-    else
-        player:SendBroadcastMessage("No missing transmog-eligible rewards found in your completed quests.")
-    end
+	if not messageSent then
+		if #recoveredItems > 0 then
+			player:SendBroadcastMessage(string.format(RECOVER_MESSAGES.recovered[langId] or RECOVER_MESSAGES.recovered[0], #recoveredItems))
+		else
+			player:SendBroadcastMessage(RECOVER_MESSAGES.noneFound[langId] or RECOVER_MESSAGES.noneFound[0])
+		end
+		messageSent = true
+	end
 end
 
 -- Todo add lua/c++ function for unequip!!

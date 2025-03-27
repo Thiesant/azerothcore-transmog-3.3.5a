@@ -386,10 +386,10 @@ function TransmogHandlers.SetTransmogItemIds(player)
 		if ( validSlotItem == 0 ) then
 			CharDBQuery("INSERT INTO character_transmog (`player_guid`, `slot`, `item`, `real_item`) VALUES ("..playerGUID..", '"..slot.."', 0, "..real_item..") ON DUPLICATE KEY UPDATE item = VALUES(item), real_item = VALUES(real_item);")
 		end
-		if (  not item or item == 0 and real_item ~= nil and real_item ~= 0 and ( validSlotItem ~= 0 or not validSlotItem )) then
-			AIO.Handle(player, "Transmog", "SetTransmogItemIdClient", slot, 0, real_item)
+		if (item == nil or item == 0) and (real_item ~= nil and real_item ~= 0) then
+			AIO.Handle(player, "Transmog", "SetTransmogItemIdClient", slot, real_item, real_item)
 		else
-			AIO.Handle(player, "Transmog", "SetTransmogItemIdClient", slot, item, real_item)
+			AIO.Handle(player, "Transmog", "SetTransmogItemIdClient", slot, item or 0, real_item or 0)
 		end
 		transmogs:NextRow()
 	end

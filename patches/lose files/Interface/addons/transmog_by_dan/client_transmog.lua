@@ -198,8 +198,15 @@ function LoadTransmogsFromCurrentIds()
     TransmogModelFrame:Undress()
     
     for slotName, transmogId in pairs(currentTransmogIds) do
-        if transmogId and slotName ~= "MainHand" and slotName ~= "SecondaryHand" and slotName ~= "Ranged" then
+        if transmogId and transmogId ~= 0 and slotName ~= "MainHand" and slotName ~= "SecondaryHand" and slotName ~= "Ranged" then
             TransmogModelFrame:TryOn(transmogId)
+        end
+		
+		if transmogId == 0 then
+            if slotButton and slotButton.hideButton then
+                slotButton.hideButton:Show()
+                slotButton.toastTexture:SetTexture("Interface\\AddOns\\transmog_by_dan\\assets\\Transmog-Overlay-Hide")
+            end
         end
     end
     
@@ -230,14 +237,15 @@ end
 
 function OnClickRestoreAllButton(btn)
 	PlaySound("Glyph_MajorCreate", "sfx")
-    for slotName, slotId in pairs(SLOT_IDS) do
-        currentTransmogIds[slotName] = nil
+
+	for slotName, slotId in pairs(SLOT_IDS) do
+		currentTransmogIds[slotName] = nil
 		originalTransmogIds[slotName] = nil
 		AIO.Handle("Transmog", "EquipTransmogItem", nil, slotId)
-    end
-    LoadTransmogsFromCurrentIds()
-	TransmogModelFrame:SetUnit("player")
-	TransmogModelFrame:Undress()
+	end
+
+	-- Ask server to re-send the updated item IDs (real/transmog)
+	AIO.Handle("Transmog", "SetTransmogItemIds")
 end
 
 function OnLeaveHideToolTip(btn)

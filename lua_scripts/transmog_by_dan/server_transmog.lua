@@ -308,7 +308,7 @@ end
 function TransmogHandlers.EquipTransmogItem(player, item, slot)
 	local playerGUID = player:GetGUIDLow()
 	
-	if item == nil and item ~= 0 then
+	if item == nil then
 		local oldItem = CharDBQuery("SELECT real_item FROM character_transmog WHERE player_guid = "..playerGUID.." AND slot = "..slot..";")
 		local oldItemId = oldItem:GetUInt32(0)
 		if oldItemId == nil or oldItemId == 0 then

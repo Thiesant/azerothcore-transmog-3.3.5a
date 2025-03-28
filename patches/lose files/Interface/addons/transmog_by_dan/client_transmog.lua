@@ -514,66 +514,75 @@ function ShowHelmToolTip(btn)
     GameTooltip:Show()
 end
 
-local function InitTabSlots()
-	local lastSlot
-	local firstInRowSlot
-	for i = 1, 6, 1 do
-		local itemChild
-		if ( i == 1 ) then
-			itemChild = CreateFrame("Frame", "ItemChild"..i, TransmogFrame, "TransmogItemWrapperTemplate") 
-			itemChild:SetPoint("TOPLEFT", 480, -240)
-			firstInRowSlot = itemChild
-		else
-			if ( i == 4 ) then
-				itemChild = CreateFrame("Frame", "ItemChild"..i, firstInRowSlot, "TransmogItemWrapperTemplate")
-				itemChild:SetPoint("RIGHT", 0, -200)
-				firstInRowSlot = itemChild
-			else
-				itemChild = CreateFrame("Button", "ItemChild"..i, lastSlot, "TransmogItemWrapperTemplate")
-				itemChild:SetPoint("RIGHT", 230, 0)
-			end
-		end
-		
-		local rightTopItemFrame = CreateFrame("Frame", "RightTopItemFrame"..i, itemChild)
-		rightTopItemFrame:SetPoint("TOPRIGHT", -4, -4)
-		rightTopItemFrame:SetSize(34, 142)
-		local rightTopTexture = rightTopItemFrame:CreateTexture(nil, "Background")
-		rightTopTexture:SetTexture(DressUpTexturePath().."2")
-		rightTopTexture:SetAllPoints()
-		local rightBottomItemFrame = CreateFrame("Frame", "RightBottomItemFrame"..i, itemChild)
-		rightBottomItemFrame:SetPoint("BOTTOMRIGHT", -4, -18)
-		rightBottomItemFrame:SetSize(34, 53)
-		local rightBottomTexture = rightBottomItemFrame:CreateTexture(nil, "Background")
-		rightBottomTexture:SetTexture(DressUpTexturePath().."4")
-		rightBottomTexture:SetAllPoints()
-		local leftTopItemFrame = CreateFrame("Frame", "LeftTopItemFrame"..i, itemChild)
-		leftTopItemFrame:SetPoint("TOPLEFT", 4, -4)
-		leftTopItemFrame:SetSize(109, 142)
-		local leftTopTexture = leftTopItemFrame:CreateTexture(nil, "Background")
-		leftTopTexture:SetTexture(DressUpTexturePath().."1")
-		leftTopTexture:SetAllPoints()
-		local leftBottomItemFrame = CreateFrame("Frame", "LeftBottomItemFrame"..i, itemChild)
-		leftBottomItemFrame:SetPoint("BOTTOMLEFT", 4, -18)
-		leftBottomItemFrame:SetSize(109, 53)
-		local leftBottomTexture = leftBottomItemFrame:CreateTexture(nil, "Background")
-		leftBottomTexture:SetTexture(DressUpTexturePath().."3")
-		leftBottomTexture:SetAllPoints()
-		local itemModel = CreateFrame("DressUpModel", "ItemModel"..i, itemChild)
-		itemModel:SetPoint("CENTER", 0, 0)
-		itemModel:SetSize(142, 172)
-		itemModel:Hide()
-		local itemButton = CreateFrame("Button", "ItemButton"..i, leftBottomItemFrame, "TransmogItemButtonTemplate")
-		itemButton:SetPoint("BOTTOMLEFT", 6, 28)
-		itemButton:SetScript("OnClick", OnClickItemTransmogButton)
-		itemButton:SetScript("OnEnter", OnEnterItemToolTip)
-		itemButton:SetScript("OnLeave", OnLeaveHideToolTip)
-		itemButton:RegisterForClicks("AnyUp");
-		itemButton:Disable()
-		lastSlot = itemChild
-		itemChild.itemModel = itemModel
-		itemChild.itemButton = itemButton
-		table.insert(itemButtons, itemChild)
-	end
+function InitTabSlots()
+    local lastSlot
+    local firstInRowSlot
+    local rowOffset = 150  -- Horizontal spacing between grids
+    local verticalOffset = -260  -- Initial vertical position
+    local startX, startY = 480, verticalOffset  -- Starting position for the first grid
+
+    -- Helper function to create frames for visual assets
+    local function CreateItemFrame(parent, index, texture, width, height, point, xOffset, yOffset)
+        local frame = CreateFrame("Frame", parent:GetName().."Frame"..index, parent)
+        frame:SetPoint(point, xOffset, yOffset)
+        frame:SetSize(width, height)
+        local textureFrame = frame:CreateTexture(nil, "BACKGROUND")
+        textureFrame:SetTexture(texture)
+        textureFrame:SetAllPoints()
+        return frame
+    end
+
+    for i = 1, 8 do
+        local itemChild
+
+        if i == 1 then
+            -- First grid in the first row
+            itemChild = CreateFrame("Frame", "ItemChild"..i, TransmogFrame, "TransmogItemWrapperTemplate")
+            itemChild:SetPoint("TOPLEFT", startX, startY)  -- Starting position for the first grid
+            firstInRowSlot = itemChild
+        elseif i <= 4 then
+            -- First four grids (first row), positioned horizontally with 0-pixel offset
+            itemChild = CreateFrame("Frame", "ItemChild"..i, TransmogFrame, "TransmogItemWrapperTemplate")
+            itemChild:SetPoint("LEFT", lastSlot, "RIGHT", 0, 0)  -- 0-pixel offset between grids
+        elseif i == 5 then
+            -- Start of the second row, anchored to the bottom-left of the first grid
+            itemChild = CreateFrame("Frame", "ItemChild"..i, TransmogFrame, "TransmogItemWrapperTemplate")
+            itemChild:SetPoint("TOPLEFT", firstInRowSlot, "BOTTOMLEFT", 0, 0)  -- 0-pixel offset between rows x & y
+            firstInRowSlot = itemChild
+        else
+            -- Following grids (second row), positioned horizontally with 0-pixel offset
+            itemChild = CreateFrame("Frame", "ItemChild"..i, TransmogFrame, "TransmogItemWrapperTemplate")
+            itemChild:SetPoint("LEFT", lastSlot, "RIGHT", 0, 0)  -- 0-pixel offset between rows x & y
+        end
+
+        -- Create visual assets for the grid (top, bottom, left, right frames)
+        local rightTopItemFrame = CreateItemFrame(itemChild, i, DressUpTexturePath().."2", 34, 142, "TOPRIGHT", -4, -4)
+        local rightBottomItemFrame = CreateItemFrame(itemChild, i, DressUpTexturePath().."4", 34, 53, "BOTTOMRIGHT", -4, -18)
+        local leftTopItemFrame = CreateItemFrame(itemChild, i, DressUpTexturePath().."1", 109, 142, "TOPLEFT", 4, -4)
+        local leftBottomItemFrame = CreateItemFrame(itemChild, i, DressUpTexturePath().."3", 109, 53, "BOTTOMLEFT", 4, -18)
+
+        -- Create the 3D model for this grid
+        local itemModel = CreateFrame("DressUpModel", "ItemModel"..i, itemChild)
+        itemModel:SetPoint("CENTER", 0, 0)
+        itemModel:SetSize(142, 172)
+        itemModel:Hide()
+
+        -- Create the button for this grid
+        local itemButton = CreateFrame("Button", "ItemButton"..i, leftBottomItemFrame, "TransmogItemButtonTemplate")
+        itemButton:SetPoint("BOTTOMLEFT", 6, 28)
+        itemButton:SetScript("OnClick", OnClickItemTransmogButton)
+        itemButton:SetScript("OnEnter", OnEnterItemToolTip)
+        itemButton:SetScript("OnLeave", OnLeaveItemToolTip)
+        itemButton:RegisterForClicks("AnyUp")
+        itemButton:Disable()
+
+        -- Store the model and button in the grid frame
+        itemChild.itemModel = itemModel
+        itemChild.itemButton = itemButton
+        table.insert(itemButtons, itemChild)
+
+        lastSlot = itemChild
+    end
 end
 
 function EnterSearchInput()

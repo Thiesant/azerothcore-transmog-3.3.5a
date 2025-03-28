@@ -214,21 +214,33 @@ end
 
 function LoadTransmogsFromCurrentIds()
     TransmogModelFrame:SetUnit("player")
-    TransmogModelFrame:Undress()
+    -- TransmogModelFrame:Undress()
+local showHelm = GetCVar("showHelm") == "1"
+local showCloak = GetCVar("showCloak") == "1"
     
     for slotName, transmogId in pairs(currentTransmogIds) do
-        if transmogId and transmogId ~= 0 and slotName ~= "MainHand" and slotName ~= "SecondaryHand" and slotName ~= "Ranged" then
-            TransmogModelFrame:TryOn(transmogId)
+        local skip = false
+			
+		if slotName == "Head" and not showHelm then
+            skip = true
+        elseif slotName == "Back" and not showCloak then
+			skip = true
         end
+			
+		if transmogId and transmogId ~= 0 and not skip and
+			slotName ~= "MainHand" and slotName ~= "SecondaryHand" and slotName ~= "Ranged" then
+			TransmogModelFrame:TryOn(transmogId)
+		end
 		
-		if transmogId == 0 then
-            if slotButton and slotButton.hideButton then
-                slotButton.hideButton:Show()
-                slotButton.toastTexture:SetTexture("Interface\\AddOns\\transmog_by_dan\\assets\\Transmog-Overlay-Hide")
+        if transmogId == 0 then
+            local showOverlay = true
+            if (slotName == "Head" and not showHelm) or
+               (slotName == "Back" and not showCloak) then
+                showOverlay = false
             end
         end
     end
-    
+
     UpdateAllSlotTextures()
 end
 
@@ -245,12 +257,17 @@ local function OnClickItemTransmogButton(btn, buttonType)
 end
 
 function OnClickHideAllButton(btn)
-	PlaySound("Glyph_MinorDestroy", "sfx")
-    for slotName, _ in pairs(SLOT_IDS) do
+    PlaySound("Glyph_MinorDestroy", "sfx")
+
+    TransmogModelFrame:SetUnit("player")
+    TransmogModelFrame:Undress()
+
+    for slotName, slotId in pairs(SLOT_IDS) do
         currentTransmogIds[slotName] = 0
+        originalTransmogIds[slotName] = 0
+        AIO.Handle("Transmog", "EquipTransmogItem", 0, slotId)
     end
-	TransmogModelFrame:SetUnit("player")
-	TransmogModelFrame:Undress()
+
     UpdateAllSlotTextures()
 end
 
@@ -756,6 +773,7 @@ RecoverTransmogTooltipTitle = RECOVER_TOOLTIP_TEXT[localeID] or RECOVER_TOOLTIP_
 RecoverTransmogTooltipDesc  = RECOVER_TOOLTIP_DESCRIPTION[localeID]  or RECOVER_TOOLTIP_DESCRIPTION[0]
 
 function TransmogHandlers.GetLocale(player, item, count)
+	local langId = HandleLocale()
     AIO.Handle("Transmog", "LootItemLocale", item, count, HandleLocale())
 end
 

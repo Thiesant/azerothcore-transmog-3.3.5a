@@ -702,23 +702,34 @@ function TransmogItemSlotButton_Update(self)
 end
 
 function OnClickHideCurrentTransmogSlot(btn)
-	PlaySound("ArcaneMissileImpacts", "sfx")
-    local slotName = TRANSMOG_SLOT_MAPPING[currentSlot]
+    PlaySound("ArcaneMissileImpacts", "sfx")
+    local parent = btn:GetParent()
+    if not parent then return end
+
+    local slotName = parent:GetName():gsub("TransmogCharacter", ""):gsub("Slot", "")
+    local slotId = SLOT_IDS[slotName]
+    if not slotId then return end
+
     currentTransmogIds[slotName] = 0
     UpdateSlotTexture(slotName, false)
-	UpdateSlotTexture(slotName, true)
-	AIO.Handle("Transmog", "EquipTransmogItem", 0, currentSlot)
-	originalTransmogIds[slotName] = transmogId
+    UpdateSlotTexture(slotName, true)
+    AIO.Handle("Transmog", "EquipTransmogItem", 0, slotId)
+    originalTransmogIds[slotName] = 0
     LoadTransmogsFromCurrentIds()
 end
 
--- Why restore only working without the transmog 0 applied? Why transmog 0?!
 function OnClickRestoreCurrentTransmogSlot(btn)
-	PlaySound("Glyph_MinorCreate", "sfx")
-    local slotName = TRANSMOG_SLOT_MAPPING[currentSlot]
+    PlaySound("Glyph_MinorCreate", "sfx")
+    local parent = btn:GetParent()
+    if not parent then return end
+
+    local slotName = parent:GetName():gsub("TransmogCharacter", ""):gsub("Slot", "")
+    local slotId = SLOT_IDS[slotName]
+    if not slotId then return end
+
     currentTransmogIds[slotName] = nil
     originalTransmogIds[slotName] = nil
-    AIO.Handle("Transmog", "EquipTransmogItem", nil, currentSlot)
+    AIO.Handle("Transmog", "EquipTransmogItem", nil, slotId)
     LoadTransmogsFromCurrentIds()
 end
 

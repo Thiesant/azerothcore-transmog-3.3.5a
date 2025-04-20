@@ -199,23 +199,23 @@
 			<Layer level="OVERLAY">
 				<FontString name="Title" parentKey="TitleText" inherits="GameFontNormalHuge">
 					<Anchors>
-						<Anchor point="CENTER" x="0" y="207"/>
+						<Anchor point="CENTER" x="0" y="227"/>
 					</Anchors>
                 </FontString>
 				<FontString name="Subtitle" parentKey="SubtitleText" inherits="GameFontNormal">
 					<Anchors>
-						<Anchor point="CENTER" x="0" y="187"/>
+						<Anchor point="CENTER" x="0" y="207"/>
 					</Anchors>
 					<Color r="0.7" g="0.7" b="0.7"/>
 				</FontString>
 				<FontString name="ShowCloakText" inherits="GameFontNormal">
 					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="145" y="60"/>
+						<Anchor point="BOTTOMLEFT" x="115" y="50"/>
 					</Anchors>
 				</FontString>
 				<FontString name="ShowHelmText" inherits="GameFontNormal">
 					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="254" y="60"/>
+						<Anchor point="BOTTOMLEFT" x="315" y="50"/>
 					</Anchors>
 				</FontString>
 				<FontString name="TransmogPaginationText" text="Page 1" inherits="GameFontNormal">
@@ -233,7 +233,7 @@
 			</Button>
 			<DressUpModel name="TransmogModelFrame">
                 <Size>
-                    <AbsDimension x="202" y="380"/>
+                    <AbsDimension x="242" y="440"/>
                 </Size>
                 <Anchors>
                     <Anchor point="TOPLEFT">
@@ -256,7 +256,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-                            		<AbsDimension x="68" y="11"/>
+                            		<AbsDimension x="85" y="11"/>
                         		</Offset>
 							</Anchor>
 						</Anchors>
@@ -311,7 +311,7 @@
             </DressUpModel>
 			<Button name="TransmogCharacterHeadSlot" inherits="TransmogItemSlotButtonTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="TransmogModelFrame" x="-46" y="0"/>
+					<Anchor point="TOPLEFT" relativeTo="TransmogModelFrame" x="-46" y="-28"/>
 				</Anchors>
 				<Scripts>
 					<OnClick function="OnClickHeadTab"/>
@@ -319,7 +319,7 @@
             </Button>
 			<Button name="TransmogCharacterShoulderSlot" inherits="TransmogItemSlotButtonTemplate">
 				<Anchors>
-					<Anchor point="BOTTOM" relativeTo="TransmogCharacterHeadSlot" x="0" y="-54"/>
+					<Anchor point="BOTTOM" relativeTo="TransmogCharacterHeadSlot" x="0" y="-52"/>
 				</Anchors>
 				<Scripts>
 					<OnClick function="OnClickShoulderTab"/>
@@ -327,7 +327,7 @@
             </Button>
 			<Button name="TransmogCharacterBackSlot" inherits="TransmogItemSlotButtonTemplate">
 				<Anchors>
-					<Anchor point="BOTTOM" relativeTo="TransmogCharacterShoulderSlot" x="0" y="-54"/>
+					<Anchor point="BOTTOM" relativeTo="TransmogCharacterShoulderSlot" x="0" y="-52"/>
 				</Anchors>
 				<Scripts>
 					<OnClick function="OnClickBackTab"/>
@@ -335,7 +335,7 @@
             </Button>
 			<Button name="TransmogCharacterChestSlot" inherits="TransmogItemSlotButtonTemplate">
 				<Anchors>
-					<Anchor point="BOTTOM" relativeTo="TransmogCharacterBackSlot" x="0" y="-54"/>
+					<Anchor point="BOTTOM" relativeTo="TransmogCharacterBackSlot" x="0" y="-52"/>
 				</Anchors>
 				<Scripts>
 					<OnClick function="OnClickChestTab"/>
@@ -343,7 +343,7 @@
             </Button>
 			<Button name="TransmogCharacterShirtSlot" inherits="TransmogItemSlotButtonTemplate">
 				<Anchors>
-					<Anchor point="BOTTOM" relativeTo="TransmogCharacterChestSlot" x="0" y="-54"/>
+					<Anchor point="BOTTOM" relativeTo="TransmogCharacterChestSlot" x="0" y="-52"/>
 				</Anchors>
 				<Scripts>
 					<OnClick function="OnClickShirtTab"/>
@@ -351,7 +351,7 @@
             </Button>
 			<Button name="TransmogCharacterTabardSlot" inherits="TransmogItemSlotButtonTemplate">
 				<Anchors>
-					<Anchor point="BOTTOM" relativeTo="TransmogCharacterShirtSlot" x="0" y="-54"/>
+					<Anchor point="BOTTOM" relativeTo="TransmogCharacterShirtSlot" x="0" y="-52"/>
 				</Anchors>
 				<Scripts>
 					<OnClick function="OnClickTabardTab"/>
@@ -359,7 +359,7 @@
             </Button>
 			<Button name="TransmogCharacterWristSlot" inherits="TransmogItemSlotButtonTemplate">
 				<Anchors>
-					<Anchor point="BOTTOM" relativeTo="TransmogCharacterTabardSlot" x="0" y="-54"/>
+					<Anchor point="BOTTOM" relativeTo="TransmogCharacterTabardSlot" x="0" y="-52"/>
 				</Anchors>
 				<Scripts>
 					<OnClick function="OnClickWristTab"/>
@@ -367,7 +367,7 @@
             </Button>
 			<Button name="TransmogCharacterHandsSlot" inherits="TransmogItemSlotButtonTemplate">
 				<Anchors>
-					<Anchor point="BOTTOM" relativeTo="TransmogCharacterHeadSlot" x="260" y="0"/>
+					<Anchor point="BOTTOM" relativeTo="TransmogCharacterHeadSlot" x="300" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnClick function="OnClickHandsTab"/>
@@ -375,7 +375,7 @@
             </Button>
 			<Button name="TransmogCharacterWaistSlot" inherits="TransmogItemSlotButtonTemplate">
 				<Anchors>
-					<Anchor point="BOTTOM" relativeTo="TransmogCharacterHandsSlot" x="0" y="-54"/>
+					<Anchor point="BOTTOM" relativeTo="TransmogCharacterHandsSlot" x="0" y="-52"/>
 				</Anchors>
 				<Scripts>
 					<OnClick function="OnClickWaistTab"/>
@@ -383,7 +383,7 @@
             </Button>
 			<Button name="TransmogCharacterLegsSlot" inherits="TransmogItemSlotButtonTemplate">
 				<Anchors>
-					<Anchor point="BOTTOM" relativeTo="TransmogCharacterWaistSlot" x="0" y="-54"/>
+					<Anchor point="BOTTOM" relativeTo="TransmogCharacterWaistSlot" x="0" y="-52"/>
 				</Anchors>
 				<Scripts>
 					<OnClick function="OnClickLegsTab"/>
@@ -391,7 +391,7 @@
             </Button>
 			<Button name="TransmogCharacterFeetSlot" inherits="TransmogItemSlotButtonTemplate">
 				<Anchors>
-					<Anchor point="BOTTOM" relativeTo="TransmogCharacterLegsSlot" x="0" y="-54"/>
+					<Anchor point="BOTTOM" relativeTo="TransmogCharacterLegsSlot" x="0" y="-52"/>
 				</Anchors>
 				<Scripts>
 					<OnClick function="OnClickFeetTab"/>
@@ -399,7 +399,7 @@
             </Button>
 			<Button name="TransmogCharacterMainHandSlot" inherits="TransmogItemSlotButtonTemplate">
 				<Anchors>
-					<Anchor point="BOTTOM" relativeTo="TransmogCharacterFeetSlot" x="0" y="-54"/>
+					<Anchor point="BOTTOM" relativeTo="TransmogCharacterFeetSlot" x="0" y="-52"/>
 				</Anchors>
 				<Scripts>
 					<OnClick function="OnClickMainTab"/>
@@ -407,7 +407,7 @@
             </Button>
 			<Button name="TransmogCharacterSecondaryHandSlot" inherits="TransmogItemSlotButtonTemplate">
 				<Anchors>
-					<Anchor point="BOTTOM" relativeTo="TransmogCharacterMainHandSlot" x="0" y="-54"/>
+					<Anchor point="BOTTOM" relativeTo="TransmogCharacterMainHandSlot" x="0" y="-52"/>
 				</Anchors>
 				<Scripts>
 					<OnClick function="OnClickOffTab"/>
@@ -415,7 +415,7 @@
             </Button>
 			<Button name="TransmogCharacterRangedSlot" inherits="TransmogItemSlotButtonTemplate">
 				<Anchors>
-					<Anchor point="BOTTOM" relativeTo="TransmogCharacterSecondaryHandSlot" x="0" y="-54"/>
+					<Anchor point="BOTTOM" relativeTo="TransmogCharacterSecondaryHandSlot" x="0" y="-52"/>
 				</Anchors>
 				<Scripts>
 					<OnClick function="OnClickRangedTab"/>

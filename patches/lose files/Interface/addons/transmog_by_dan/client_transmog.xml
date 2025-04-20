@@ -534,10 +534,10 @@
 			<Button name="RecoverTransmogButton">
 				<Size x="24" y="24"/>
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" x="80" y="60"/>
+					<Anchor point="CENTER" x="-160" y="175"/>
 				</Anchors>
-				<Texture file="Interface\AddOns\transmog_by_dan\assets\UI-QuestLog-BookIcon"/>
-				<PushedTexture file="interface\addons\transmog_by_dan\assets\Transmog-Overlay-Hide"/>
+				<NormalTexture file="interface\addons\transmog_by_dan\assets\Transmog-Recover"/>
+				<PushedTexture file="interface\addons\transmog_by_dan\assets\Transmog-Recover"/>
 				<HighlightTexture file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
 				<Scripts>
 					<OnClick function="RecoverMissingTransmogs"/>

@@ -1158,7 +1158,7 @@ function OnTransmogFrameLoad(self)
 	end
 	local SHOW_CLOAK_TEXTS = {
     [0] = "Show Cloak",        -- enUS
-    [2] = "Montrer cape",   -- frFR
+    [2] = "Montrer cape",      -- frFR
     [3] = "Cloak anzeigen",    -- deDE
     [6] = "Mostrar capa",      -- esES
     [8] = "Показать плащ",     -- ruRU
@@ -1168,7 +1168,7 @@ function OnTransmogFrameLoad(self)
     end
 	local SHOW_HELM_TEXTS = {
     [0] = "Show Helm",        -- enUS
-    [2] = "Montrer casque",-- frFR
+    [2] = "Montrer casque",   -- frFR
     [3] = "Helm anzeigen",    -- deDE
     [6] = "Mostrar casco",    -- esES
     [8] = "Показать шлем",    -- ruRU
@@ -1176,12 +1176,17 @@ function OnTransmogFrameLoad(self)
 	if ShowHelmText then
     ShowHelmText:SetText(SHOW_HELM_TEXTS[localeID] or SHOW_HELM_TEXTS[0])
 	end
+	-- Search only works with english names, if "Filter Item Appearance" is changed to other locale,as is, it will breaks the initset frames
 	local SEARCH_PLACEHOLDER_TEXTS = {
 	[0] = "Filter Item Appearance",
-	[2] = "Filtrer une apparence",
-	[3] = "Aussehen filtern",
-	[6] = "Filtrar apariencia",
-	[8] = "Фильтр внешности"
+	[2] = "Filter Item Appearance",
+	[3] = "Filter Item Appearance",
+	[6] = "Filter Item Appearance",
+	[8] = "Filter Item Appearance"
+	-- [2] = "Filtrer une apparence",
+	-- [3] = "Aussehen filtern",
+	-- [6] = "Filtrar apariencia",
+	-- [8] = "Фильтр внешности"
 }
 	 if ItemSearchInput then
         ItemSearchInput:SetText("|cff808080" .. (SEARCH_PLACEHOLDER_TEXTS[localeID] or SEARCH_PLACEHOLDER_TEXTS[0]) .. "|r")

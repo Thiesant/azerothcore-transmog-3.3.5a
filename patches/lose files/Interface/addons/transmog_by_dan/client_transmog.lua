@@ -1146,11 +1146,11 @@ function OnTransmogFrameLoad(self)
 	TransmogFrame.TitleText:SetText(TITLE_TEXTS[localeID] or TITLE_TEXTS[0])
 	end
 	local SUBTITLE_TEXTS = {
-		[0] = "Collected Item Appearances",
-		[2] = "Apparences d'objets collectées",
-		[3] = "Gesammelte Gegenstands-Transmogs",
-		[6] = "Apariencias de objetos recogidas",
-		[8] = "Собранные внешности предметов"
+		[0] = "Item Appearances",
+		[2] = "Apparences d'objets",
+		[3] = "Gegenstands-Transmogs",
+		[6] = "Apariencias de objetos",
+		[8] = "Внешности предметов"
 	}
 	
 	if TransmogFrame.SubtitleText then

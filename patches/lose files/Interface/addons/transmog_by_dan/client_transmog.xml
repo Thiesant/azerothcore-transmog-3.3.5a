@@ -197,14 +197,14 @@
 				</Texture>
 			</Layer>
 			<Layer level="OVERLAY">
-				<FontString name="Title" parentKey="TitleText" inherits="GameFontNormalHuge">
+				<FontString name="Title" parentKey="TitleText" inherits="GameFontNormal">
 					<Anchors>
-						<Anchor point="CENTER" x="0" y="227"/>
+						<Anchor point="CENTER" x="-20" y="242"/>
 					</Anchors>
                 </FontString>
 				<FontString name="Subtitle" parentKey="SubtitleText" inherits="GameFontNormal">
 					<Anchors>
-						<Anchor point="CENTER" x="0" y="207"/>
+						<Anchor point="CENTER" x="-20" y="225"/>
 					</Anchors>
 					<Color r="0.7" g="0.7" b="0.7"/>
 				</FontString>
@@ -227,9 +227,14 @@
 		</Layers>
 		<Frames>
 			<Button name="TransmogCloseButton" inherits="UIPanelCloseButton" >
+				<Size>
+					<AbsDimension x="28" y="28"/>
+				</Size>
 				<Anchors>
-					<Anchor point="TOPRIGHT" x="-42" y="-84"/>
+					<Anchor point="TOPRIGHT" x="-48" y="-70"/>
 				</Anchors>
+				<NormalTexture file="interface\addons\transmog_by_dan\assets\Transmog-Close"/>
+				<HighlightTexture file="Interface\Buttons\ButtonHilight-Round" alphaMode="ADD"/>
 			</Button>
 			<DressUpModel name="TransmogModelFrame">
                 <Size>

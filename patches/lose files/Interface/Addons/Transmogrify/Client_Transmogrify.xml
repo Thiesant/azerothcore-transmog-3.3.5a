@@ -1,5 +1,5 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
-	<Script file="client_transmog.lua"/>
+	<Script file="Client_Transmogrify.lua"/>
 	<Button name="TransmogCharacterSlotRestoreButtonTemplate" virtual="true">
 		<Size x="16" y="16"/>
 		<Anchors>
@@ -7,7 +7,7 @@
 		</Anchors>
 		<Layers>
 			<Layer level="OVERLAY">
-				<Texture file="Interface\AddOns\transmog_by_dan\assets\Transmog-Overlay-Restore">
+				<Texture file="Interface\AddOns\Transmogrify\Assets\Transmog-Overlay-Restore">
 					<Size x="23" y="23"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
@@ -15,7 +15,7 @@
 				</Texture>
 			</Layer>
 			<Layer level="HIGHLIGHT">
-				<Texture file="Interface\AddOns\transmog_by_dan\assets\Transmog-Overlay-Restore">
+				<Texture file="Interface\AddOns\Transmogrify\Assets\Transmog-Overlay-Restore">
 					<Size x="23" y="23"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
@@ -37,7 +37,7 @@
 		</Anchors>
 		<Layers>
 			<Layer level="OVERLAY">
-				<Texture file="Interface\AddOns\transmog_by_dan\assets\Transmog-Overlay-Hide">
+				<Texture file="Interface\AddOns\Transmogrify\Assets\Transmog-Overlay-Hide">
 					<Size x="21" y="21"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
@@ -45,7 +45,7 @@
 				</Texture>
 			</Layer>
 			<Layer level="HIGHLIGHT">
-				<Texture file="Interface\AddOns\transmog_by_dan\assets\Transmog-Overlay-Hide">
+				<Texture file="Interface\AddOns\Transmogrify\Assets\Transmog-Overlay-Hide">
 					<Size x="18" y="18"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
@@ -69,7 +69,7 @@
 						<Anchor point="CENTER"/>
 					</Anchors>
 				</Texture>
-				<Texture parentKey="toastTexture" file="Interface\AddOns\transmog_by_dan\assets\Transmog-Overlay-Toast">
+				<Texture parentKey="toastTexture" file="Interface\AddOns\Transmogrify\Assets\Transmog-Overlay-Toast">
 					<Size x="64" y="64"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
@@ -102,7 +102,7 @@
 	<Button name="TransmogItemButtonTemplate" inherits="ItemButtonTemplate" virtual="true">
 		<Layers>
 			<Layer level="OVERLAY">
-				<Texture parentKey="toastTexture" file="Interface\AddOns\transmog_by_dan\assets\Transmog-Overlay-Toast">
+				<Texture parentKey="toastTexture" file="Interface\AddOns\Transmogrify\Assets\Transmog-Overlay-Toast">
 					<Size x="64" y="64"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
@@ -131,7 +131,7 @@
 		<Size x="40" y="40"/>
 		<Layers>
 			<Layer level="OVERLAY">
-				<Texture file="Interface\AddOns\transmog_by_dan\assets\Transmog-Overlay-Restore">
+				<Texture file="Interface\AddOns\Transmogrify\Assets\Transmog-Overlay-Restore">
 					<Size x="32" y="32"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
@@ -139,7 +139,7 @@
 				</Texture>
 			</Layer>
 			<Layer level="HIGHLIGHT">
-				<Texture file="Interface\AddOns\transmog_by_dan\assets\Transmog-Overlay-Restore">
+				<Texture file="Interface\AddOns\Transmogrify\Assets\Transmog-Overlay-Restore">
 					<Size x="32" y="32"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
@@ -157,7 +157,7 @@
 		<Size x="40" y="40"/>
 		<Layers>
 			<Layer level="OVERLAY">
-				<Texture file="Interface\AddOns\transmog_by_dan\assets\Transmog-Overlay-Hide">
+				<Texture file="Interface\AddOns\Transmogrify\Assets\Transmog-Overlay-Hide">
 					<Size x="30" y="30"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
@@ -165,7 +165,7 @@
 				</Texture>
 			</Layer>
 			<Layer level="HIGHLIGHT">
-				<Texture file="Interface\AddOns\transmog_by_dan\assets\Transmog-Overlay-Hide">
+				<Texture file="Interface\AddOns\Transmogrify\Assets\Transmog-Overlay-Hide">
 					<Size x="25" y="25"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
@@ -186,7 +186,7 @@
 		</Anchors>
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture name="$parentDialogBG" hWrapMode="false" vWrapMode="false" vertTile="false" horizTile="false" file="Interface\AddOns\transmog_by_dan\assets\Transmog-Frame">
+				<Texture name="$parentDialogBG" hWrapMode="false" vWrapMode="false" vertTile="false" horizTile="false" file="Interface\AddOns\Transmogrify\Assets\Transmog-Frame">
 					<Size x="1200" y="700"/>
 					<TexCoords left="0" right="0.52" top="0" bottom="0.66">
 						<Rect ULx="" ULy="" LLx="" LLy="" URx="" URy="" LRx="" LRy="" />
@@ -233,7 +233,7 @@
 				<Anchors>
 					<Anchor point="TOPRIGHT" x="-48" y="-70"/>
 				</Anchors>
-				<NormalTexture file="interface\addons\transmog_by_dan\assets\Transmog-Close"/>
+				<NormalTexture file="interface\addons\Transmogrify\Assets\Transmog-Close"/>
 				<HighlightTexture file="Interface\Buttons\ButtonHilight-Round" alphaMode="ADD"/>
 			</Button>
 			<DressUpModel name="TransmogModelFrame">
@@ -472,7 +472,7 @@
 						</Texture>
 					</Layer>
 					<Layer level="OVERLAY">
-						<Texture name="SaveTexture" file="Interface\AddOns\transmog_by_dan\assets\Transmog-Icon-Holder">
+						<Texture name="SaveTexture" file="Interface\AddOns\Transmogrify\Assets\Transmog-Icon-Holder">
 							<Size x="192" y="96"/>
 							<Anchors>
 								<Anchor point="CENTER" x="-2" y=""/>
@@ -541,8 +541,8 @@
 				<Anchors>
 					<Anchor point="CENTER" x="-160" y="175"/>
 				</Anchors>
-				<NormalTexture file="interface\addons\transmog_by_dan\assets\Transmog-Recover"/>
-				<PushedTexture file="interface\addons\transmog_by_dan\assets\Transmog-Recover"/>
+				<NormalTexture file="interface\addons\Transmogrify\Assets\Transmog-Recover"/>
+				<PushedTexture file="interface\addons\Transmogrify\Assets\Transmog-Recover"/>
 				<HighlightTexture file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
 				<Scripts>
 					<OnClick function="RecoverMissingTransmogs"/>

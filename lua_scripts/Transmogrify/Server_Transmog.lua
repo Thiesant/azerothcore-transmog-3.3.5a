@@ -1,4 +1,6 @@
----------------------|Created by DanielTheDeveloper|-----------------------|
+-- Created by DanielTheDeveloper
+-- Alternate version by Thiesant
+-- V2.4.1a
 
 local AIO = AIO or require("AIO")
 

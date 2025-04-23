@@ -1,5 +1,7 @@
 -- TooltipClient.lua (WoTLK 3.3.5a Compatible Version with Localization)
 -- v1.3
+-- Author Thiesant
+
 local AIO = AIO or require("AIO")
 
 if AIO.AddAddon() then

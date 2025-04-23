@@ -1,5 +1,7 @@
 -- TooltipServer.lua (WoTLK 3.3.5a Compatible Version)
 -- v1.2
+-- Author Thiesant
+
 local AIO = AIO or require("AIO")
 
 local TransmogTooltipHandler = AIO.AddHandlers("TransmogTooltip", {})

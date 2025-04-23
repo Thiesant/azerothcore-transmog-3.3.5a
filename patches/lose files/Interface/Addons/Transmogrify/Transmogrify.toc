@@ -1,0 +1,11 @@
+## Interface: 30300
+## Title: |cff8B0000Transmogrify|r
+## Notes: Transmogrify System for WoW 3.3.5
+## Version: 2.4.1a
+## Author: Original author : DanielTheDeveloper and Marotheit contribution, alternate version by Thiesant
+## Deps: AIO_Client
+
+#dependencies
+\Interface\addons\AIO_Client\Aio.lua
+
+Client_Transmogrify.xml

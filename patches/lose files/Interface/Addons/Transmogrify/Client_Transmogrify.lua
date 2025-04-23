@@ -1,4 +1,7 @@
----------------------|Created by DanielTheDeveloper|-----------------------|
+-- Created by DanielTheDeveloper
+-- Contribution of Marotheit
+-- Alternate version by Thiesant
+-- V2.4.1a 
 
 local AIO = AIO or require("AIO")
 if AIO.AddAddon() then
@@ -80,7 +83,7 @@ function TableSetHelper(list)
     return set
 end
 
-local EMPTY_TEXTURE = "Interface\\AddOns\\transmog_by_dan\\assets\\Transmog-Icon-Inactive"
+local EMPTY_TEXTURE = "Interface\\AddOns\\Transmogrify\\Assets\\Transmog-Icon-Inactive"
 local EMPTY_EQUIPMENT_ICON_BACKGROUND_PATH = "Interface\\paperdoll\\UI-PaperDoll-Slot-"
 local EQUIPMENT_ICON_TYPES = {"Head", "", "Shoulder", "Shirt", "Chest", "Waist", "Legs", "Feet", "Wrists", "Hands", "", "", "", "", "Chest", "MainHand", "SecondaryHand", "Ranged", "Tabard"}
 -- List of character item frames that will be used
@@ -897,11 +900,11 @@ function SetTab()
 	currentPage = 1
 	TransmogPaginationText:SetText("Page 1")
 	for slot, value in pairs(SLOT_IDS) do
-		_G["TransmogCharacter"..slot.."Slot"].toastTexture:SetTexture("Interface\\AddOns\\transmog_by_dan\\assets\\Transmog-Overlay-Toast")
+		_G["TransmogCharacter"..slot.."Slot"].toastTexture:SetTexture("Interface\\AddOns\\Transmogrify\\Assets\\Transmog-Overlay-Toast")
 		_G["TransmogCharacter"..slot.."Slot"].restoreButton:Hide()
 		_G["TransmogCharacter"..slot.."Slot"].hideButton:Hide()
 	end
-	_G["TransmogCharacter"..TRANSMOG_SLOT_MAPPING[currentSlot].."Slot"].toastTexture:SetTexture("Interface\\AddOns\\transmog_by_dan\\assets\\Transmog-Overlay-Selected")
+	_G["TransmogCharacter"..TRANSMOG_SLOT_MAPPING[currentSlot].."Slot"].toastTexture:SetTexture("Interface\\AddOns\\Transmogrify\\Assets\\Transmog-Overlay-Selected")
 	_G["TransmogCharacter"..TRANSMOG_SLOT_MAPPING[currentSlot].."Slot"].restoreButton:Show()
 	_G["TransmogCharacter"..TRANSMOG_SLOT_MAPPING[currentSlot].."Slot"].hideButton:Show()
 	AIO.Handle("Transmog", "SetCurrentSlotItemIds", currentSlot, currentPage)
@@ -1216,7 +1219,7 @@ end
 	characterTransmogTab:SetPoint("TOPRIGHT", CharacterFrame, "TOPRIGHT", 0, -48)
 	characterTransmogTab:Show()
 	innerCharacterTransmogTab = characterTransmogTab:CreateTexture("Item", "ARTWORK")
-	innerCharacterTransmogTab:SetTexture("Interface\\AddOns\\transmog_by_dan\\assets\\Transmog-Icon")
+	innerCharacterTransmogTab:SetTexture("Interface\\AddOns\\Transmogrify\\Assets\\Transmog-Icon")
 	innerCharacterTransmogTab:SetAllPoints()
 	innerCharacterTransmogTab:Show()
 	characterTransmogTab:SetScript("OnEnter", TransmogTabTooltip)
@@ -1237,7 +1240,7 @@ end
 	TransmogFrame:RegisterEvent("UNIT_MODEL_CHANGED")
 	TransmogFrame:SetScript("OnEvent", OnEventEnterWorldReloadTransmogIds)
 
-	SetItemButtonTexture(_G["SaveButton"], "Interface\\AddOns\\transmog_by_dan\\assets\\Transmog-Icon")
+	SetItemButtonTexture(_G["SaveButton"], "Interface\\AddOns\\Transmogrify\\Assets\\Transmog-Icon")
 
 	TransmogModelMouseRotation(TransmogModelFrame)
 

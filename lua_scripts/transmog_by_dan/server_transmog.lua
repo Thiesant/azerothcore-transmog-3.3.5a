@@ -500,9 +500,10 @@ function TransmogHandlers.SetCurrentSlotItemIds(player, slot, page)
 end
 
 function TransmogHandlers.SetSearchCurrentSlotItemIds(player, slot, page, search)
+
 	-- Ensure search is not empty or nil
 	if ( search == nil or search == '' ) then
-		return;
+		return
 	end
 
 	-- Escape special characters in search string
@@ -531,44 +532,62 @@ function TransmogHandlers.SetSearchCurrentSlotItemIds(player, slot, page, search
 	if not inventoryTypes then
 		return -- Slot not valid
 	end
-
-    -- Calculate page offset
-    local pageOffset = (page > 1) and (SLOTS * (page - 1)) or 0
 	
-    -- Query to count matching transmogs
-    local countQuery = string.format(
-        "SELECT COUNT(unlocked_item_id) FROM account_transmog WHERE account_id = %d AND inventory_type %s AND (display_id LIKE '%%%s%%' OR item_name LIKE '%%%s%%');", 
-        player:GetAccountId(), inventoryTypes, search, search
-    )
-    local countResult = AuthDBQuery(countQuery)
-    if not countResult then
-        AIO.Handle(player, "Transmog", "InitTab", {}, page, false)
-        return
-    end
+	-- Calculate page offset
+	local pageOffset = (page > 1) and (SLOTS * (page - 1)) or 0
+	local accountId = player:GetAccountId()
 
-    local totalTransmogs = countResult:GetUInt32(0)
-    local hasMorePages = (totalTransmogs > SLOTS * page)
+    -- Item name search querry will look into both account_transmog and item_template_locale and will return results without duplicate if item exist in DB and is unlocked
+	local countQuery = string.format([[
+		SELECT COUNT(DISTINCT at.unlocked_item_id)
+		FROM acore_auth.account_transmog at
+		LEFT JOIN acore_world.item_template_locale loc 
+			ON at.unlocked_item_id = loc.ID
+		WHERE at.account_id = %d AND at.inventory_type %s
+		AND (
+			at.display_id LIKE '%%%s%%'
+			OR at.item_name LIKE '%%%s%%'
+			OR loc.Name LIKE '%%%s%%'
+		);
+	]], accountId, inventoryTypes, search, search, search)
 
-    -- Query to get transmogs
-    local transmogQuery = string.format(
-        "SELECT unlocked_item_id FROM account_transmog WHERE account_id = %d AND inventory_type %s AND (display_id LIKE '%%%s%%' OR item_name LIKE '%%%s%%') LIMIT %d OFFSET %d;", 
-        player:GetAccountId(), inventoryTypes, search, search, SLOTS, pageOffset
-    )
-    local transmogs = AuthDBQuery(transmogQuery)
-    if not transmogs then
-        AIO.Handle(player, "Transmog", "InitTab", {}, page, false)
-        return
-    end
+	local countResult = AuthDBQuery(countQuery)
+	if not countResult then
+		AIO.Handle(player, "Transmog", "InitTab", {}, page, false)
+		return
+	end
 
-    -- Collect the unlocked item IDs
-    local currentSlotItemIds = {}
-    for i = 1, transmogs:GetRowCount() do
-        local currentRow = transmogs:GetRow()
-        local item = currentRow["unlocked_item_id"]
-        table.insert(currentSlotItemIds, item)
-        transmogs:NextRow()
-    end
+	local totalTransmogs = countResult:GetUInt32(0)
+	local hasMorePages = (totalTransmogs > SLOTS * page)
 
+	local transmogQuery = string.format([[
+		SELECT DISTINCT at.unlocked_item_id
+		FROM acore_auth.account_transmog at
+		LEFT JOIN acore_world.item_template_locale loc 
+			ON at.unlocked_item_id = loc.ID
+		WHERE at.account_id = %d AND at.inventory_type %s
+		AND (
+			at.display_id LIKE '%%%s%%'
+			OR at.item_name LIKE '%%%s%%'
+			OR loc.Name LIKE '%%%s%%'
+		)
+		LIMIT %d OFFSET %d;
+	]], accountId, inventoryTypes, search, search, search, SLOTS, pageOffset)
+
+	local transmogs = AuthDBQuery(transmogQuery)
+	if not transmogs then
+		AIO.Handle(player, "Transmog", "InitTab", {}, page, false)
+		return
+	end
+
+	local currentSlotItemIds = {}
+	for i = 1, transmogs:GetRowCount() do
+		local currentRow = transmogs:GetRow()
+		local item = currentRow["unlocked_item_id"]
+		table.insert(currentSlotItemIds, item)
+		transmogs:NextRow()
+	end
+	
     -- Return the result
     AIO.Handle(player, "Transmog", "InitTab", currentSlotItemIds, page, hasMorePages)
 end

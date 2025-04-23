@@ -787,10 +787,21 @@ function OnClickApplyAllowTransmogs(btn)
     LoadTransmogsFromCurrentIds()
 end
 
+local TRANSMOG_LABELS = {
+	[0] = "Transmogrify",		-- enUS
+	[2] = "Transmogrifier",		-- frFR
+	[3] = "Transmogrifizieren",	-- deDE
+	[6] = "Transmogrificar",	-- esES
+	[8] = "Трансмогрификация",	-- ruRU
+}
+
 local function TransmogTabTooltip(btn)
-	GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-	GameTooltip:AddLine("Transmogrify", 1, 1, 1)
-	GameTooltip:Show()
+    local localeID = HandleLocale()
+    local label = TRANSMOG_LABELS[localeID] or TRANSMOG_LABELS[0]
+
+    GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+    GameTooltip:AddLine(label, 1, 1, 1)
+    GameTooltip:Show()
 end
 
 local PAGE_TEXTS = {
@@ -856,6 +867,15 @@ function TransmogHandlers.InitTab(player, newSlotItemIds, page, hasMorePages)
 	end
 end
 
+	-- Search only works with english names, if "Filter Item Appearance" is changed to other locale,as is, it will breaks the initset frames
+	local SEARCH_PLACEHOLDER_TEXTS = {
+	[0] = "Filter Item Appearance",
+	[2] = "Filtrer une apparence",
+	[3] = "Aussehen filtern",
+	[6] = "Filtrar apariencia",
+	[8] = "Фильтр внешности"
+}
+
 function SetSearchTab()
 	PlaySound("igSpellBookSpellIconPickup", "sfx")
 	currentPage = 1
@@ -865,7 +885,11 @@ function SetSearchTab()
 end
 
 function SetTab()
-	if ( ItemSearchInput:GetText() ~= "" and ItemSearchInput:GetText() ~= "|cff808080Filter Item Appearance|r") then
+	local localeID = HandleLocale()
+	local placeholder = SEARCH_PLACEHOLDER_TEXTS[localeID] or SEARCH_PLACEHOLDER_TEXTS[0]
+	local formattedPlaceholder = "|cff808080" .. placeholder .. "|r"
+
+	if ( ItemSearchInput:GetText() ~= "" and ItemSearchInput:GetText() ~= formattedPlaceholder ) then
 		SetSearchTab()
 		return;
 	end
@@ -1176,21 +1200,13 @@ function OnTransmogFrameLoad(self)
 	if ShowHelmText then
     ShowHelmText:SetText(SHOW_HELM_TEXTS[localeID] or SHOW_HELM_TEXTS[0])
 	end
-	-- Search only works with english names, if "Filter Item Appearance" is changed to other locale,as is, it will breaks the initset frames
-	local SEARCH_PLACEHOLDER_TEXTS = {
-	[0] = "Filter Item Appearance",
-	[2] = "Filter Item Appearance",
-	[3] = "Filter Item Appearance",
-	[6] = "Filter Item Appearance",
-	[8] = "Filter Item Appearance"
-	-- [2] = "Filtrer une apparence",
-	-- [3] = "Aussehen filtern",
-	-- [6] = "Filtrar apariencia",
-	-- [8] = "Фильтр внешности"
-}
-	 if ItemSearchInput then
-        ItemSearchInput:SetText("|cff808080" .. (SEARCH_PLACEHOLDER_TEXTS[localeID] or SEARCH_PLACEHOLDER_TEXTS[0]) .. "|r")
-    end
+
+if ItemSearchInput then
+	local localeID = HandleLocale()
+	local placeholder = SEARCH_PLACEHOLDER_TEXTS[localeID] or SEARCH_PLACEHOLDER_TEXTS[0]
+	local formattedPlaceholder = "|cff808080" .. placeholder .. "|r"
+	ItemSearchInput:SetText(formattedPlaceholder)
+end
 	ItemSearchInput:SetScript("OnEnterPressed", SetSearchTab)
 	
 	InitTabSlots()

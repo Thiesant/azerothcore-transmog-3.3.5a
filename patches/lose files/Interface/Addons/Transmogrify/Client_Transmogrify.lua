@@ -1493,6 +1493,14 @@ local SET_LABEL_TEXT = {
     [8] = "Комплект",   -- ruRU
 }
 
+local NEW_SET_ENTRY_TEXT = {
+    [0] = "Creating a new set:",    -- enUS
+    [2] = "Création d'un nouveau set :", -- frFR
+    [3] = "Erstellen eines neuen Sets:", -- deDE
+    [6] = "Creando un nuevo conjunto:", -- esES
+    [8] = "Создание нового комплекта:", -- ruRU
+}
+
 function OnClickSaveSetButton()
     if currentTransmogSetId then
         ShowSaveSetConfirmation()
@@ -1543,13 +1551,6 @@ local REPLACE_SET_TEXT = {
     [8] = "Замена существующего комплекта:", -- ruRU
 }
 
-local NEW_SET_ENTRY_TEXT = {
-    [0] = "Creating a new set:",    -- enUS
-    [2] = "Création d'un nouveau set :", -- frFR
-    [3] = "Erstellen eines neuen Sets:", -- deDE
-    [6] = "Creando un nuevo conjunto:", -- esES
-    [8] = "Создание нового комплекта:", -- ruRU
-}
 
 function ShowSaveSetConfirmation()
     local localeID = HandleLocale()

@@ -1486,7 +1486,7 @@ function TemporaryTransmogSetForSave()
 end
 
 local SET_LABEL_TEXT = {
-    [0] = "Seta",        -- enUS
+    [0] = "Set",        -- enUS
     [2] = "Set",        -- frFR
     [3] = "Set",        -- deDE
     [6] = "Conjunto",   -- esES

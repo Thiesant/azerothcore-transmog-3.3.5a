@@ -8,24 +8,24 @@ local TransmogHandlers = AIO.AddHandlers("Transmog", {})
 
 local NPCID = 11326
 
-local SLOTS = 6
+local SLOTS = 8
 
 local CALC = 281
 
-local PLAYER_VISIBLE_ITEM_1_ENTRYID  = 283
-local PLAYER_VISIBLE_ITEM_3_ENTRYID  = 287
-local PLAYER_VISIBLE_ITEM_4_ENTRYID  = 289
-local PLAYER_VISIBLE_ITEM_5_ENTRYID  = 291
-local PLAYER_VISIBLE_ITEM_6_ENTRYID  = 293 
-local PLAYER_VISIBLE_ITEM_7_ENTRYID  = 295
-local PLAYER_VISIBLE_ITEM_8_ENTRYID  = 297
-local PLAYER_VISIBLE_ITEM_9_ENTRYID  = 299
-local PLAYER_VISIBLE_ITEM_10_ENTRYID  = 301
-local PLAYER_VISIBLE_ITEM_15_ENTRYID  = 311
-local PLAYER_VISIBLE_ITEM_16_ENTRYID  = 313
-local PLAYER_VISIBLE_ITEM_17_ENTRYID  = 315
-local PLAYER_VISIBLE_ITEM_18_ENTRYID  = 317
-local PLAYER_VISIBLE_ITEM_19_ENTRYID  = 319
+local PLAYER_VISIBLE_ITEM_1_ENTRYID  = 283 -- Head
+local PLAYER_VISIBLE_ITEM_3_ENTRYID  = 287 -- Shoulde
+local PLAYER_VISIBLE_ITEM_4_ENTRYID  = 289 -- Shirt
+local PLAYER_VISIBLE_ITEM_5_ENTRYID  = 291 -- Chest
+local PLAYER_VISIBLE_ITEM_6_ENTRYID  = 293 -- Waist
+local PLAYER_VISIBLE_ITEM_7_ENTRYID  = 295 -- Legs
+local PLAYER_VISIBLE_ITEM_8_ENTRYID  = 297 -- Feet
+local PLAYER_VISIBLE_ITEM_9_ENTRYID  = 299 -- Wrist
+local PLAYER_VISIBLE_ITEM_10_ENTRYID  = 301 -- Hands
+local PLAYER_VISIBLE_ITEM_15_ENTRYID  = 311 -- Back
+local PLAYER_VISIBLE_ITEM_16_ENTRYID  = 313 -- Main hand
+local PLAYER_VISIBLE_ITEM_17_ENTRYID  = 315 -- Off hand
+local PLAYER_VISIBLE_ITEM_18_ENTRYID  = 317 -- Ranged
+local PLAYER_VISIBLE_ITEM_19_ENTRYID  = 319 -- Tabard
 
 local UNUSABLE_INVENTORY_TYPES = {[2] = true, [11] = true, [12] = true, [18] = true, [24] = true, [27] = true, [28] = true}
 -- use .recovertransmog in game to recover missing rewarded transmog from quests
@@ -60,8 +60,8 @@ function Transmog_OnCharacterCreate(event, player)
 	CharDBQuery("INSERT IGNORE INTO `character_transmog` (`player_guid`, `slot`, `item`, `real_item`) VALUES ("..playerGUID..", '"..PLAYER_VISIBLE_ITEM_9_ENTRYID.."', '', '');") -- Wrist
 	CharDBQuery("INSERT IGNORE INTO `character_transmog` (`player_guid`, `slot`, `item`, `real_item`) VALUES ("..playerGUID..", '"..PLAYER_VISIBLE_ITEM_10_ENTRYID.."', '', '');") -- Hands
 	CharDBQuery("INSERT IGNORE INTO `character_transmog` (`player_guid`, `slot`, `item`, `real_item`) VALUES ("..playerGUID..", '"..PLAYER_VISIBLE_ITEM_15_ENTRYID.."', '', '');") -- Back
-	CharDBQuery("INSERT IGNORE INTO `character_transmog` (`player_guid`, `slot`, `item`, `real_item`) VALUES ("..playerGUID..", '"..PLAYER_VISIBLE_ITEM_16_ENTRYID.."', '', '');") -- Main
-	CharDBQuery("INSERT IGNORE INTO `character_transmog` (`player_guid`, `slot`, `item`, `real_item`) VALUES ("..playerGUID..", '"..PLAYER_VISIBLE_ITEM_17_ENTRYID.."', '', '');") -- Off
+	CharDBQuery("INSERT IGNORE INTO `character_transmog` (`player_guid`, `slot`, `item`, `real_item`) VALUES ("..playerGUID..", '"..PLAYER_VISIBLE_ITEM_16_ENTRYID.."', '', '');") -- Main hand
+	CharDBQuery("INSERT IGNORE INTO `character_transmog` (`player_guid`, `slot`, `item`, `real_item`) VALUES ("..playerGUID..", '"..PLAYER_VISIBLE_ITEM_17_ENTRYID.."', '', '');") -- Off hand
 	CharDBQuery("INSERT IGNORE INTO `character_transmog` (`player_guid`, `slot`, `item`, `real_item`) VALUES ("..playerGUID..", '"..PLAYER_VISIBLE_ITEM_18_ENTRYID.."', '', '');") -- Ranged
 	CharDBQuery("INSERT IGNORE INTO `character_transmog` (`player_guid`, `slot`, `item`, `real_item`) VALUES ("..playerGUID..", '"..PLAYER_VISIBLE_ITEM_19_ENTRYID.."', '', '');") -- Tabard
 end
@@ -327,6 +327,17 @@ function Transmog_Load(player)
 	AIO.Handle(player, "Transmog", "LoadTransmogsAfterSave")
 end
 
+function EnsureCharacterTransmogSlots(player)
+    local playerGUID = player:GetGUIDLow()
+    local slots = {
+        283, 287, 289, 291, 293, 295, 297, 299, 301, 311, 313, 315, 317, 319
+    }
+
+    for _, slot in ipairs(slots) do
+        CharDBQuery("INSERT IGNORE INTO `character_transmog` (`player_guid`, `slot`, `item`, `real_item`) VALUES ("..playerGUID..", '"..slot.."', 0, 0);")
+    end
+end
+
 function Transmog_OnLogin(event, player)
 	-- Apply transmog on login
 	-- Transmog_Load(player)
@@ -335,6 +346,7 @@ function Transmog_OnLogin(event, player)
 end
 
 function TransmogHandlers.LoadPlayer(player)
+	EnsureCharacterTransmogSlots(player)
 	Transmog_Load(player)
 	player:SetUInt32Value(147, 1) -- use unit padding
 end
@@ -606,6 +618,108 @@ function TransmogHandlers.SetEquipmentTransmogInfo(player, slot, currentTooltipS
 		AIO.Handle(player, "Transmog", "SetEquipmentTransmogInfoClient", currentTooltipSlot)
 	end
 end
+
+function TransmogHandlers.SaveTransmogSet(player, setId, setName, transmogData)
+    local accountId = player:GetAccountId()
+    local playerGUID = player:GetGUIDLow()
+    local VALID_SLOTS = {
+    283, 287, 289, 291, 293, 295, 297, 299, 301, 311, 313, 315, 317, 319
+    }
+
+    local countQuery = AuthDBQuery("SELECT COUNT(DISTINCT set_id) FROM account_transmog_sets WHERE account_id = " .. accountId)
+    if countQuery and countQuery:GetUInt32(0) >= 20 then
+        player:SendBroadcastMessage("20 sets capped, can't save")
+        return
+    end
+
+    AuthDBQuery("DELETE FROM account_transmog_sets WHERE account_id = "..accountId.." AND set_id = "..setId)
+
+    local safeName = setName:gsub("'", "''")
+    local previewMap = {}
+	
+    if transmogData then
+        for _, entry in ipairs(transmogData) do
+            local slot = tonumber(entry.slot)
+            local item = tonumber(entry.item)
+            if slot then
+                previewMap[slot] = item or 0
+            end
+        end
+    end
+
+    local dbMap = {}
+    local charQuery = CharDBQuery("SELECT slot, item FROM character_transmog WHERE player_guid = "..playerGUID)
+    if charQuery then
+        repeat
+            local slot = charQuery:GetUInt32(0)
+            local item = charQuery:GetUInt32(1)
+            dbMap[slot] = item or 0
+        until not charQuery:NextRow()
+    end
+
+    for _, slot in ipairs(VALID_SLOTS) do
+        local itemId = previewMap[slot] or dbMap[slot] or 0
+
+        AuthDBQuery(string.format(
+            "INSERT INTO account_transmog_sets (account_id, set_id, slot, item_transmog_display, set_name) VALUES (%d, %d, %d, %d, '%s')",
+            accountId, setId, slot, itemId, safeName
+        ))
+    end
+end
+
+function TransmogHandlers.RenameTransmogSet(player, setId, newName)
+    local accountId = player:GetAccountId()
+    local safeName = newName:gsub("'", "''")
+
+    AuthDBQuery(string.format(
+        "UPDATE account_transmog_sets SET set_name = '%s' WHERE account_id = %d AND set_id = %d",
+        safeName, accountId, setId
+    ))
+
+    TransmogHandlers.LoadTransmogSets(player)
+end
+
+function TransmogHandlers.LoadTransmogSets(player)
+    local accountId = player:GetAccountId()
+    local sets = {}
+    local query = AuthDBQuery("SELECT DISTINCT set_id, set_name FROM account_transmog_sets WHERE account_id = " .. accountId)
+
+    if query then
+        repeat
+            table.insert(sets, {set_id = query:GetUInt32(0), set_name = query:GetString(1)})
+        until not query:NextRow()
+    end
+
+    AIO.Handle(player, "Transmog", "ReceiveTransmogSetList", sets)
+end
+
+function TransmogHandlers.DeleteTransmogSet(player, setId)
+    local accountId = player:GetAccountId()
+    AuthDBQuery(string.format(
+        "DELETE FROM account_transmog_sets WHERE account_id = %d AND set_id = %d",
+        accountId, setId
+    ))
+
+    TransmogHandlers.LoadTransmogSets(player)
+end
+
+function TransmogHandlers.PreviewTransmogSet(player, setId)
+    local accountId = player:GetAccountId()
+    local preview = {}
+
+    local query = AuthDBQuery("SELECT slot, item_transmog_display FROM account_transmog_sets WHERE account_id = "..accountId.." AND set_id = "..setId)
+    if query then
+        repeat
+            table.insert(preview, {
+                slot = query:GetUInt32(0),
+                item = query:GetUInt32(1)
+            })
+        until not query:NextRow()
+    end
+
+    AIO.Handle(player, "Transmog", "PreviewTransmogSetClient", preview)
+end
+
 
 RegisterPlayerEvent(1, Transmog_OnCharacterCreate)
 RegisterPlayerEvent(2, Transmog_OnCharacterDelete)

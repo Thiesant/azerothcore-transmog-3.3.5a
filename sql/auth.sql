@@ -1,8 +1,8 @@
 -- --------------------------------------------------------
--- Host:                         192.168.0.167
--- Server-Version:               8.3.0 - MySQL Community Server - GPL
--- Server-Betriebssystem:        Linux
--- HeidiSQL Version:             12.8.0.6908
+-- Host:                       127.0.0.1
+-- Server-Version:             8.4.0 - MySQL Community Server - GPL
+-- OS:                         Windows 11
+-- SQLYog Community Version:   13.3.0
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -14,7 +14,8 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
--- Exportiere Struktur von Tabelle acore_auth.account_transmog
+-- Import tables to acore_auth
+
 CREATE TABLE IF NOT EXISTS `account_transmog` (
   `account_id` int unsigned NOT NULL,
   `unlocked_item_id` int unsigned NOT NULL,
@@ -25,7 +26,14 @@ CREATE TABLE IF NOT EXISTS `account_transmog` (
   UNIQUE KEY `account_display_id` (`account_id`,`display_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Daten-Export vom Benutzer nicht ausgewählt
+CREATE TABLE IF NOT EXISTS `account_transmog_sets` (
+    `account_id` INT UNSIGNED NOT NULL,
+    `set_id` INT UNSIGNED NOT NULL,
+    `slot` INT UNSIGNED NOT NULL,
+    `item_transmog_display` INT UNSIGNED NOT NULL,
+    `set_name` VARCHAR(25) NOT NULL,
+    PRIMARY KEY (`account_id`, `set_id`, `slot`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

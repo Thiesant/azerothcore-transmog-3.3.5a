@@ -218,35 +218,29 @@ end
 function LoadTransmogsFromCurrentIds()
     TransmogModelFrame:SetUnit("player")
     -- TransmogModelFrame:Undress()
-local showHelm = GetCVar("showHelm") == "1"
-local showCloak = GetCVar("showCloak") == "1"
-    
+
+    local showHelm = GetCVar("showHelm") == "1"
+    local showCloak = GetCVar("showCloak") == "1"
+
     for slotName, transmogId in pairs(currentTransmogIds) do
         local skip = false
-			
-		if slotName == "Head" and not showHelm then
+
+        -- Skip slots where we don't want to preview if hidden and no transmog
+        if slotName == "Head" and not showHelm and (transmogId == nil or transmogId == 0) then
             skip = true
-        elseif slotName == "Back" and not showCloak then
-			skip = true
+        elseif slotName == "Back" and not showCloak and (transmogId == nil or transmogId == 0) then
+            skip = true
+        elseif (slotName == "MainHand" or slotName == "SecondaryHand" or slotName == "Ranged") and (transmogId == nil or transmogId == 0) then
+            skip = true
         end
-			
-		if transmogId and transmogId ~= 0 and not skip and
-			slotName ~= "MainHand" and slotName ~= "SecondaryHand" and slotName ~= "Ranged" then
-			TransmogModelFrame:TryOn(transmogId)
-		end
-		
-        if transmogId == 0 then
-            local showOverlay = true
-            if (slotName == "Head" and not showHelm) or
-               (slotName == "Back" and not showCloak) then
-                showOverlay = false
-            end
+
+        if transmogId and transmogId ~= 0 and not skip then
+            TransmogModelFrame:TryOn(transmogId)
         end
     end
 
     UpdateAllSlotTextures()
 end
-
 local function OnClickItemTransmogButton(btn, buttonType)
 	PlaySound("igMainMenuOptionCheckBoxOn", "sfx")
 	LoadTransmogsFromCurrentIds()
@@ -431,106 +425,107 @@ function HideAllItemsToolTip(btn)
 end
 
 
-local SHOW_CLOAK_TOOLTIP_TEXTS = {
-    [0] = "Toggle Character Cloak Display",        -- enUS
-    [2] = "Basculer l'affichage de la cape",      -- frFR
-    [3] = "Schalter für den Charakterumhang",     -- deDE
-    [6] = "Alternar la visualización de capa",    -- esES
-    [8] = "Переключить отображение плаща",        -- ruRU
+local SHOW_CLOAK_TOOLTIP_L0 = {
+    [0] = "Toggle Cloak Display",           -- enUS
+    [2] = "Basculer l'affichage de la cape", -- frFR
+    [3] = "Umhang ein-/ausblenden",         -- deDE
+    [6] = "Alternar capa",                  -- esES
+    [8] = "Переключить отображение плаща",  -- ruRU
 }
 
-local SHOW_CLOAK_TOOLTIP_DESC = {
-    [0] = "This checkbox provides the same function as",   -- enUS
-    [2] = "Cette case à cocher fournit la même fonction que", -- frFR
-    [3] = "Dieses Kontrollkästchen bietet die gleiche Funktion wie", -- deDE
-    [6] = "Esta casilla de verificación proporciona la misma función que", -- esES
-    [8] = "Этот флажок выполняет ту же функцию, что и", -- ruRU
+local SHOW_CLOAK_TOOLTIP_L1 = {
+    [0] = " ",                                                    -- enUS
+    [2] = " ",                                                    -- frFR
+    [3] = " ",                                                    -- deDE
+    [6] = " ",                                                    -- esES
+    [8] = " ",                                                    -- ruRU
 }
 
-local SHOW_CLOAK_TOOLTIP_EXTRA = {
-    [0] = "ticking or unticking the \"Show Cloak\" checkbox",   -- enUS
-    [2] = "cocher ou décocher la case \"Afficher la cape\"", -- frFR
-    [3] = "An- oder Abwählen des Kontrollkästchens \"Umhang anzeigen\"", -- deDE
-    [6] = "marcar o desmarcar la casilla \"Mostrar capa\"", -- esES
-    [8] = "отметка или снятие отметки с флажка \"Показать плащ\"", -- ruRU
+local SHOW_CLOAK_TOOLTIP_L2 = {
+    [0] = "Same as the \"Show Cloak\" Cvar in the",               -- enUS
+    [2] = "Même fonction que la case \"Afficher la cape\"",              -- frFR
+    [3] = "Gleiche Funktion wie das Kontrollkästchen",            -- deDE
+    [6] = "Misma función que la casilla \"Mostrar",               -- esES
+    [8] = "Та же функция, что и флажок \"Показать",               -- ruRU
 }
 
-local SHOW_CLOAK_TOOLTIP_EFFECT = {
-    [0] = "in the interface options menu. It will have no", -- enUS
-    [2] = "dans le menu des options de l'interface. Cela n'aura aucun", -- frFR
-    [3] = "im Menü der Interface-Optionen. Es hat keine", -- deDE
-    [6] = "en el menú de opciones de la interfaz. No tendrá ningún", -- esES
-    [8] = "в меню параметров интерфейса. Это не окажет", -- ruRU
+local SHOW_CLOAK_TOOLTIP_L3 = {
+    [0] = "interface options. No effect on the",                  -- enUS
+    [2] = "dans les options de l'interface. Aucun effet",  -- frFR
+    [3] = "Umhang\" in den Interface-Optionen. Keine Auswirkung", -- deDE
+    [6] = "capa\" en las opciones de la interfaz. No afectará",   -- esES
+    [8] = "плащ\" в настройках интерфейса. Это не влияет",        -- ruRU
 }
 
-local SHOW_CLOAK_TOOLTIP_FINAL = {
-    [0] = "effect on the transmogrify preview window.",  -- enUS
-    [2] = "effet sur la fenêtre de prévisualisation de transmogrification.", -- frFR
-    [3] = "Auswirkungen auf das Vorschaufenster für Transmogrifikation.", -- deDE
-    [6] = "efecto en la ventana de vista previa de transfiguración.", -- esES
-    [8] = "влияния на окно предварительного просмотра трансмогрификации.", -- ruRU
+local SHOW_CLOAK_TOOLTIP_L4 = {
+    [0] = "transmogrify preview.",                                -- enUS
+    [2] = "sur la prévisu de transmogrification.",                -- frFR
+    [3] = "auf die Transmogrifikationsvorschau.",                 -- deDE
+    [6] = "la vista previa de transfiguración.",                  -- esES
+    [8] = "на окно трансмогрификации.",                           -- ruRU
 }
+
 
 
 function ShowCloakToolTip(btn)
 	local localeID = HandleLocale()
 	GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-	GameTooltip:AddLine(SHOW_CLOAK_TOOLTIP_TEXTS[localeID] or SHOW_CLOAK_TOOLTIP_TEXTS[0], 1, 1, 1)
-	GameTooltip:AddLine(SHOW_CLOAK_TOOLTIP_DESC[localeID] or SHOW_CLOAK_TOOLTIP_DESC[0], 1, 0.8, 0)
-	GameTooltip:AddLine(SHOW_CLOAK_TOOLTIP_EXTRA[localeID] or SHOW_CLOAK_TOOLTIP_EXTRA[0], 1, 0.8, 0)
-	GameTooltip:AddLine(SHOW_CLOAK_TOOLTIP_EFFECT[localeID] or SHOW_CLOAK_TOOLTIP_EFFECT[0], 1, 0.8, 0)
-	GameTooltip:AddLine(SHOW_CLOAK_TOOLTIP_FINAL[localeID] or SHOW_CLOAK_TOOLTIP_FINAL[0], 1, 0.8, 0)
+	GameTooltip:AddLine(SHOW_CLOAK_TOOLTIP_L0[localeID] or SHOW_CLOAK_TOOLTIP_L0[0], 1, 1, 1)
+	GameTooltip:AddLine(SHOW_CLOAK_TOOLTIP_L1[localeID] or SHOW_CLOAK_TOOLTIP_L1[0], 1, 0.8, 0)
+	GameTooltip:AddLine(SHOW_CLOAK_TOOLTIP_L2[localeID] or SHOW_CLOAK_TOOLTIP_L2[0], 1, 0.8, 0)
+	GameTooltip:AddLine(SHOW_CLOAK_TOOLTIP_L3[localeID] or SHOW_CLOAK_TOOLTIP_L3[0], 1, 0.8, 0)
+	GameTooltip:AddLine(SHOW_CLOAK_TOOLTIP_L4[localeID] or SHOW_CLOAK_TOOLTIP_L4[0], 1, 0.8, 0)
 	GameTooltip:Show()
 end
 
-local SHOW_HELM_TOOLTIP_TEXTS = {
-    [0] = "Toggle Character Helm Display",        -- enUS
-    [2] = "Basculer l'affichage du casque",      -- frFR
+local SHOW_HELM_TOOLTIP_L0 = {
+    [0] = "Toggle Character Helm Display",         -- enUS
+    [2] = "Basculer l'affichage du casque",        -- frFR
     [3] = "Schalter für die Charakterhelmanzeige", -- deDE
-    [6] = "Alternar la visualización del casco", -- esES
-    [8] = "Переключить отображение шлема",       -- ruRU
+    [6] = "Alternar la visualización del casco",   -- esES
+    [8] = "Переключить отображение шлема",         -- ruRU
 }
 
-local SHOW_HELM_TOOLTIP_DESC = {
-    [0] = "This checkbox provides the same function as",   -- enUS
-    [2] = "Cette case à cocher fournit la même fonction que", -- frFR
-    [3] = "Dieses Kontrollkästchen bietet die gleiche Funktion wie", -- deDE
-    [6] = "Esta casilla de verificación proporciona la misma función que", -- esES
-    [8] = "Этот флажок выполняет ту же функцию, что и", -- ruRU
+local SHOW_HELM_TOOLTIP_L1 = {
+    [0] = " ",                                                     -- enUS
+    [2] = " ",                                                     -- frFR
+    [3] = " ",                                                     -- deDE
+    [6] = " ",                                                     -- esES
+    [8] = " ",                                                     -- ruRU
 }
 
-local SHOW_HELM_TOOLTIP_EXTRA = {
-    [0] = "ticking or unticking the \"Show Helm\" checkbox",   -- enUS
-    [2] = "cocher ou décocher la case \"Afficher le casque\"", -- frFR
-    [3] = "An- oder Abwählen des Kontrollkästchens \"Helm anzeigen\"", -- deDE
-    [6] = "marcar o desmarcar la casilla \"Mostrar casco\"", -- esES
-    [8] = "отметка или снятие отметки с флажка \"Показать шлем\"", -- ruRU
+local SHOW_HELM_TOOLTIP_L2 = {
+    [0] = "Same as the \"Show Helm\" Cvar in the",                 -- enUS
+    [2] = "Même fonction que la case \"Afficher le casque\"",      -- frFR
+    [3] = "Gleiche Funktion wie das Kontrollkästchen",             -- deDE
+    [6] = "Misma función que la casilla \"Mostrar",                -- esES
+    [8] = "Та же функция, что и флажок \"Показать",                -- ruRU
 }
 
-local SHOW_HELM_TOOLTIP_EFFECT = {
-    [0] = "in the interface options menu. It will have no", -- enUS
-    [2] = "dans le menu des options de l'interface. Cela n'aura aucun", -- frFR
-    [3] = "im Menü der Interface-Optionen. Es hat keine", -- deDE
-    [6] = "en el menú de opciones de la interfaz. No tendrá ningún", -- esES
-    [8] = "в меню параметров интерфейса. Это не окажет", -- ruRU
+local SHOW_HELM_TOOLTIP_L3 = {
+    [0] = "interface options. No effect on the",                   -- enUS
+    [2] = "dans les options de l'interface. Aucun effet",          -- frFR
+    [3] = "Helm\" in den Interface-Optionen. Keine Auswirkung",    -- deDE
+    [6] = "casco\" en las opciones de la interfaz. No afectará",   -- esES
+    [8] = "шлем\" в настройках интерфейса. Это не влияет",         -- ruRU
 }
 
-local SHOW_HELM_TOOLTIP_FINAL = {
-    [0] = "effect on the transmogrify preview window.",  -- enUS
-    [2] = "effet sur la fenêtre de prévisualisation de transmogrification.", -- frFR
-    [3] = "Auswirkungen auf das Vorschaufenster für Transmogrifikation.", -- deDE
-    [6] = "efecto en la ventana de vista previa de transfiguración.", -- esES
-    [8] = "влияния на окно предварительного просмотра трансмогрификации.", -- ruRU
+local SHOW_HELM_TOOLTIP_L4 = {
+    [0] = "transmogrify preview.",                                 -- enUS
+    [2] = "sur la prévisu de transmogrification.",                 -- frFR
+    [3] = "auf die Transmogrifikationsvorschau.",                  -- deDE
+    [6] = "la vista previa de transfiguración.",                   -- esES
+    [8] = "на окно трансмогрификации.",                            -- ruRU
 }
 
 function ShowHelmToolTip(btn)
     local localeID = HandleLocale()  -- Récupère la langue du client
     GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-    GameTooltip:AddLine(SHOW_HELM_TOOLTIP_TEXTS[localeID] or SHOW_HELM_TOOLTIP_TEXTS[0], 1, 1, 1)  -- Affiche le titre
-    GameTooltip:AddLine(SHOW_HELM_TOOLTIP_DESC[localeID] or SHOW_HELM_TOOLTIP_DESC[0], 1, 0.8, 0)  -- Première ligne de description
-    GameTooltip:AddLine(SHOW_HELM_TOOLTIP_EXTRA[localeID] or SHOW_HELM_TOOLTIP_EXTRA[0], 1, 0.8, 0)  -- Deuxième ligne de description
-    GameTooltip:AddLine(SHOW_HELM_TOOLTIP_EFFECT[localeID] or SHOW_HELM_TOOLTIP_EFFECT[0], 1, 0.8, 0)  -- Troisième ligne de description
-    GameTooltip:AddLine(SHOW_HELM_TOOLTIP_FINAL[localeID] or SHOW_HELM_TOOLTIP_FINAL[0], 1, 0.8, 0)  -- Dernière ligne de description
+    GameTooltip:AddLine(SHOW_HELM_TOOLTIP_L0[localeID] or SHOW_HELM_TOOLTIP_L0[0], 1, 1, 1)  -- Affiche le titre
+    GameTooltip:AddLine(SHOW_HELM_TOOLTIP_L1[localeID] or SHOW_HELM_TOOLTIP_L1[0], 1, 0.8, 0)  -- Première ligne de description
+    GameTooltip:AddLine(SHOW_HELM_TOOLTIP_L2[localeID] or SHOW_HELM_TOOLTIP_L2[0], 1, 0.8, 0)  -- Deuxième ligne de description
+    GameTooltip:AddLine(SHOW_HELM_TOOLTIP_L3[localeID] or SHOW_HELM_TOOLTIP_L3[0], 1, 0.8, 0)  -- Troisième ligne de description
+    GameTooltip:AddLine(SHOW_HELM_TOOLTIP_L4[localeID] or SHOW_HELM_TOOLTIP_L4[0], 1, 0.8, 0)  -- Dernière ligne de description
     GameTooltip:Show()
 end
 
@@ -1295,6 +1290,397 @@ function PaperDollFrame_OnShow(self)
 
 	LoadTransmogsFromCurrentIds()
 	-- end custom code
+end
+
+local SET_NONE_LABEL = {
+    [0] = "None",        -- enUS
+    [2] = "Aucun",       -- frFR
+    [3] = "Keiner",      -- deDE
+    [6] = "Ninguno",     -- esES
+    [8] = "Нет",         -- ruRU
+}
+local DEFAULT_SET_NAME = {
+    [0] = "None",       -- enUS
+    [2] = "Aucun",      -- frFR
+    [3] = "Keiner",     -- deDE
+    [6] = "Ninguno",    -- esES
+    [8] = "Нет",        -- ruRU
+}
+
+local SET_LABEL = {
+    [0] = "Set: %s",        -- enUS
+    [2] = "Set : %s",       -- frFR
+    [3] = "Set: %s",        -- deDE
+    [6] = "Conjunto: %s",   -- esES
+    [8] = "Комплект: %s",   -- ruRU
+}
+local currentTransmogSetId = nil
+local availableSets = {}
+
+function TransmogSetButton_OnLoad(self)
+    local localeID = HandleLocale()
+    currentTransmogSetName = DEFAULT_SET_NAME[localeID] or DEFAULT_SET_NAME[0]
+    self:SetText(string.format(SET_LABEL[localeID] or SET_LABEL[0], currentTransmogSetName))
+end
+
+function TransmogHandlers.PreviewTransmogSetClient(player, setItems)
+    currentTransmogIds = {}
+
+    for _, entry in ipairs(setItems) do
+        local slot = tonumber(entry.slot)
+        local itemId = tonumber(entry.item)
+
+        local slotName = TRANSMOG_SLOT_MAPPING[slot]
+        if slotName then
+            currentTransmogIds[slotName] = itemId
+        end
+    end
+
+    LoadTransmogsFromCurrentIds()
+end
+
+local NO_SET_AVAILABLE_TEXT = {
+    [0] = "No set available",
+    [2] = "Aucun set disponible",
+    [3] = "Kein Set verfügbar",
+    [6] = "Ningún conjunto disponible",
+    [8] = "Нет доступных комплектов"
+}
+
+local RENAME_SET_TEXT = {
+    [0] = "Rename selected set",
+    [2] = "Renommer le set sélectionné",
+    [3] = "Ausgewähltes Set umbenennen",
+    [6] = "Renombrar conjunto seleccionado",
+    [8] = "Переименовать выбранный комплект"
+}
+
+local DELETE_SET_TEXT = {
+    [0] = "|cffff2020Delete this set|r",
+    [2] = "|cffff2020Supprimer ce set|r",
+    [3] = "|cffff2020Dieses Set löschen|r",
+    [6] = "|cffff2020Eliminar este conjunto|r",
+    [8] = "|cffff2020Удалить этот комплект|r"
+}
+
+local SAVE_APPEARANCE_TEXT = {
+    [0] = "|cff00ff00Save current appearance|r",
+    [2] = "|cff00ff00Sauvegarder l'apparence actuelle|r",
+    [3] = "|cff00ff00Aktuelles Aussehen speichern|r",
+    [6] = "|cff00ff00Guardar apariencia actual|r",
+    [8] = "|cff00ff00Сохранить текущий облик|r"
+}
+
+local RENAME_SET_PROMPT_TEXT = {
+    [0] = "Enter the new name for the set:",
+    [2] = "Entrez le nouveau nom pour le set :",
+    [3] = "Neuen Namen für das Set eingeben:",
+    [6] = "Introduce el nuevo nombre del conjunto:",
+    [8] = "Введите новое название комплекта:"
+}
+
+local DELETE_SET_PROMPT_TEXT = {
+    [0] = "Are you sure you want to delete the set: |cffffff00%s|r?",
+    [2] = "Êtes-vous sûr de vouloir supprimer le set : |cffffff00%s|r ?",
+    [3] = "Möchtest du das Set wirklich löschen: |cffffff00%s|r?",
+    [6] = "¿Seguro que quieres eliminar el conjunto: |cffffff00%s|r?",
+    [8] = "Вы уверены, что хотите удалить комплект: |cffffff00%s|r?"
+}
+
+local DELETE_CONFIRM_BUTTON_TEXT = {
+    [0] = "|cffff2020Delete|r",
+    [2] = "|cffff2020Supprimer|r",
+    [3] = "|cffff2020Löschen|r",
+    [6] = "|cffff2020Eliminar|r",
+    [8] = "|cffff2020Удалить|r"
+}
+
+local CANCEL_BUTTON_TEXT = {
+    [0] = "Cancel",
+    [2] = "Annuler",
+    [3] = "Abbrechen",
+    [6] = "Cancelar",
+    [8] = "Отмена"
+}
+
+local RENAME_BUTTON_TEXT = {
+    [0] = "Rename",
+    [2] = "Renommer",
+    [3] = "Umbenennen",
+    [6] = "Renombrar",
+    [8] = "Переименовать"
+}
+
+function OnClickTransmogSetButton(self)
+    AIO.Handle("Transmog", "LoadTransmogSets")
+
+    C_Timer.After(0.1, function()
+        local menu = {}
+        local localeID = HandleLocale()
+
+        if #availableSets == 0 then
+            table.insert(menu, {
+                text = NO_SET_AVAILABLE_TEXT[localeID] or NO_SET_AVAILABLE_TEXT[0],
+                isTitle = true,
+                notCheckable = true
+            })
+        else
+            for _, set in ipairs(availableSets) do
+                table.insert(menu, {
+                    text = set.set_name,
+                    notCheckable = true,
+                    func = function()
+                        currentTransmogSetId = set.set_id
+                        currentTransmogSetName = set.set_name
+                        TransmogSetButton:SetText(string.format(SET_LABEL[localeID] or SET_LABEL[0], currentTransmogSetName))
+                        AIO.Handle("Transmog", "PreviewTransmogSet", set.set_id)
+                    end
+                })
+            end
+        end
+
+        if currentTransmogSetId then
+            table.insert(menu, { text = " ", isTitle = true, notCheckable = true })
+            table.insert(menu, {
+                text = RENAME_SET_TEXT[localeID] or RENAME_SET_TEXT[0],
+                notCheckable = true,
+                func = OnClickRenameSetButton
+            })
+            table.insert(menu, {
+                text = DELETE_SET_TEXT[localeID] or DELETE_SET_TEXT[0],
+                notCheckable = true,
+                func = OnClickDeleteSetButton
+            })
+        end
+
+        table.insert(menu, {
+            text = SAVE_APPEARANCE_TEXT[localeID] or SAVE_APPEARANCE_TEXT[0],
+            notCheckable = true,
+            func = OnClickSaveSetButton
+        })
+
+        EasyMenu(menu, CreateFrame("Frame", "TransmogSetMenu", UIParent, "UIDropDownMenuTemplate"), self, 0, 0, "MENU")
+    end)
+end
+
+
+function TransmogHandlers.ReceiveTransmogSetList(player, sets)
+    availableSets = {}
+    for _, set in ipairs(sets) do
+        table.insert(availableSets, set)
+    end
+end
+
+function TemporaryTransmogSetForSave()
+    local data = {}
+
+    for slotName, itemId in pairs(currentTransmogIds) do
+        for slotId, name in pairs(TRANSMOG_SLOT_MAPPING) do
+            if name == slotName then
+                table.insert(data, { slot = slotId, item = itemId })
+            end
+        end
+    end
+
+    return data
+end
+
+local SET_LABEL_TEXT = {
+    [0] = "Seta",        -- enUS
+    [2] = "Set",        -- frFR
+    [3] = "Set",        -- deDE
+    [6] = "Conjunto",   -- esES
+    [8] = "Комплект",   -- ruRU
+}
+
+function OnClickSaveSetButton()
+    if currentTransmogSetId then
+        ShowSaveSetConfirmation()
+    else
+        local id = (#availableSets > 0 and availableSets[#availableSets].set_id + 1) or 1
+        local name = string.format("%s %d", SET_LABEL_TEXT[localeId] or SET_LABEL_TEXT[0], id)  -- Translate "Set" and append the id
+        
+        local transmogData = TemporaryTransmogSetForSave()
+        AIO.Handle("Transmog", "SaveTransmogSet", id, name, transmogData)
+        
+        currentTransmogSetId = id
+        currentTransmogSetName = name
+        TransmogSetButton:SetText(string.format("%s : %s", SET_LABEL_TEXT[localeId] or SET_LABEL_TEXT[0], currentTransmogSetName))  -- Localize "Set :"
+        
+        print(NEW_SET_ENTRY_TEXT[localeId] or NEW_SET_ENTRY_TEXT[0], name)
+    end
+end
+
+local SAVE_SET_PROMPT_TEXT = {
+    [0] = "Do you want to replace the existing set?\nSet Name: |cffffff00%s|r",  -- enUS
+    [2] = "Souhaitez-vous remplacer le set existant ?\nNom du set : |cffffff00%s|r",  -- frFR
+    [3] = "Möchten Sie das vorhandene Set ersetzen?\nSet-Name: |cffffff00%s|r", -- deDE
+    [6] = "¿Quieres reemplazar el set existente?\nNombre del set: |cffffff00%s|r", -- esES
+    [8] = "Вы хотите заменить существующий комплект?\nИмя комплекта: |cffffff00%s|r", -- ruRU
+}
+
+local SAVE_SET_CONFIRM_BUTTON_TEXT = {
+    [0] = "Replace",   -- enUS
+    [2] = "Remplacer",  -- frFR
+    [3] = "Ersetzen",   -- deDE
+    [6] = "Reemplazar", -- esES
+    [8] = "Заменить",   -- ruRU
+}
+
+local CREATE_NEW_SET_TEXT = {
+    [0] = "New set",        -- enUS
+    [2] = "Nouveau set",    -- frFR
+    [3] = "Neues Set",      -- deDE
+    [6] = "Nuevo conjunto", -- esES
+    [8] = "Новый комплект", -- ruRU
+}
+
+local REPLACE_SET_TEXT = {
+    [0] = "Replacing the existing set:",    -- enUS
+    [2] = "Remplacement du set existant :", -- frFR
+    [3] = "Ersetzen des bestehenden Sets:", -- deDE
+    [6] = "Reemplazando el conjunto existente:", -- esES
+    [8] = "Замена существующего комплекта:", -- ruRU
+}
+
+local NEW_SET_ENTRY_TEXT = {
+    [0] = "Creating a new set:",    -- enUS
+    [2] = "Création d'un nouveau set :", -- frFR
+    [3] = "Erstellen eines neuen Sets:", -- deDE
+    [6] = "Creando un nuevo conjunto:", -- esES
+    [8] = "Создание нового комплекта:", -- ruRU
+}
+
+function ShowSaveSetConfirmation()
+    local localeID = HandleLocale()
+    local dialog = StaticPopupDialogs["TRANSMOG_SAVE_SET_CONFIRM"]
+    if not dialog then
+        StaticPopupDialogs["TRANSMOG_SAVE_SET_CONFIRM"] = {
+            text = SAVE_SET_PROMPT_TEXT[localeID] or SAVE_SET_PROMPT_TEXT[0],
+            button1 = SAVE_SET_CONFIRM_BUTTON_TEXT[localeID] or SAVE_SET_CONFIRM_BUTTON_TEXT[0], -- Remplacer
+            button2 = CREATE_NEW_SET_TEXT[localeID] or CREATE_NEW_SET_TEXT[0],  -- Créer un nouveau
+            button3 = CANCEL_BUTTON_TEXT[localeID] or CANCEL_BUTTON_TEXT[0],  -- Annuler
+            timeout = 0,
+            whileDead = true,
+            hideOnEscape = true,
+            preferredIndex = 3,
+            OnAccept = function(self, data)
+                local id = currentTransmogSetId
+                local name = currentTransmogSetName
+                local data = TemporaryTransmogSetForSave()
+                AIO.Handle("Transmog", "SaveTransmogSet", id, name, data)
+                print(REPLACE_SET_TEXT[localeId] or REPLACE_SET_TEXT[0], name)
+            end,
+            OnCancel = function(self, data, reason)
+                if reason == "clicked" then
+                    local id = (#availableSets > 0 and availableSets[#availableSets].set_id + 1) or 1
+                    local name = "Set " .. id
+                    AIO.Handle("Transmog", "SaveTransmogSet", id, name, data)
+                    currentTransmogSetId = id
+                    currentTransmogSetName = name
+                    TransmogSetButton:SetText("Set : " .. currentTransmogSetName)
+                    print(CREATE_NEW_SET_TEXT[localeId] or CREATE_NEW_SET_TEXT[0], name)
+                end
+            end
+        }
+    end
+
+    StaticPopup_Show("TRANSMOG_SAVE_SET_CONFIRM", currentTransmogSetName or "Aucun")
+end
+
+function ShowRenameSetConfirmation()
+    local localeID = HandleLocale()
+    if not StaticPopupDialogs["TRANSMOG_RENAME_SET_CONFIRM"] then
+        StaticPopupDialogs["TRANSMOG_RENAME_SET_CONFIRM"] = {
+            text = RENAME_SET_PROMPT_TEXT[localeID] or RENAME_SET_PROMPT_TEXT[0],
+            button1 = RENAME_BUTTON_TEXT[localeID] or RENAME_BUTTON_TEXT[0],
+            button2 = CANCEL_BUTTON_TEXT[localeID] or CANCEL_BUTTON_TEXT[0],
+            hasEditBox = true,
+            timeout = 0,
+            whileDead = true,
+            hideOnEscape = true,
+            preferredIndex = 4,
+            OnShow = function(self)
+                self.editBox:SetText(currentTransmogSetName or "")
+                self.editBox:SetFocus()
+            end,
+            OnAccept = function(self)
+                local newName = self.editBox:GetText()
+                if currentTransmogSetId then
+                    AIO.Handle("Transmog", "RenameTransmogSet", currentTransmogSetId, newName)
+                    currentTransmogSetName = newName
+                    TransmogSetButton:SetText(string.format(SET_LABEL[localeID] or SET_LABEL[0], newName))
+                end
+            end,
+        }
+    end
+
+    StaticPopup_Show("TRANSMOG_RENAME_SET_CONFIRM")
+end
+
+local NO_SET_SELECTED_TO_RENAME = {
+    [0] = "No transmog set selected to rename.",
+    [2] = "Aucun set sélectionné à renommer.",
+    [3] = "Kein Set zum Umbenennen ausgewählt.",
+    [6] = "No se ha seleccionado ningún conjunto para renombrar.",
+    [8] = "Ни один набор не выбран для переименования."
+}
+
+function OnClickRenameSetButton()
+    local localeID = HandleLocale()
+    if currentTransmogSetId then
+        ShowRenameSetConfirmation()
+    else
+        print(NO_SET_SELECTED_TO_RENAME[localeID] or NO_SET_SELECTED_TO_RENAME[0])
+    end
+end
+
+function ShowDeleteSetConfirmation()
+    local localeID = HandleLocale()
+
+    if not StaticPopupDialogs["TRANSMOG_DELETE_SET_CONFIRM"] then
+        StaticPopupDialogs["TRANSMOG_DELETE_SET_CONFIRM"] = {
+            text = DELETE_SET_PROMPT_TEXT[localeID] or DELETE_SET_PROMPT_TEXT[0],
+            button1 = DELETE_CONFIRM_BUTTON_TEXT[localeID] or DELETE_CONFIRM_BUTTON_TEXT[0],
+            button2 = CANCEL_BUTTON_TEXT[localeID] or CANCEL_BUTTON_TEXT[0],
+            timeout = 0,
+            whileDead = true,
+            hideOnEscape = true,
+            preferredIndex = 5,
+            OnShow = function(self)
+                local name = currentTransmogSetName or (SET_NONE_LABEL[localeID] or SET_NONE_LABEL[0])
+                self.text:SetFormattedText(DELETE_SET_PROMPT_TEXT[localeID] or DELETE_SET_PROMPT_TEXT[0], name)
+            end,
+            OnAccept = function()
+                if currentTransmogSetId then
+                    AIO.Handle("Transmog", "DeleteTransmogSet", currentTransmogSetId)
+                    currentTransmogSetId = nil
+                    currentTransmogSetName = SET_NONE_LABEL[localeID] or SET_NONE_LABEL[0]
+                    TransmogSetButton:SetText(string.format(SET_LABEL[localeID] or SET_LABEL[0], currentTransmogSetName))
+                end
+            end,
+        }
+    end
+
+    local name = currentTransmogSetName or (SET_NONE_LABEL[localeID] or SET_NONE_LABEL[0])
+    StaticPopup_Show("TRANSMOG_DELETE_SET_CONFIRM", name)
+end
+
+local NO_SET_SELECTED_TO_DELETE = {
+    [0] = "No transmog set selected to delete.",
+    [2] = "Aucun set sélectionné à supprimer.",
+    [3] = "Kein Set zum Löschen ausgewählt.",
+    [6] = "No se ha seleccionado ningún conjunto para eliminar.",
+    [8] = "Ни один набор не выбран для удаления."
+}
+
+function OnClickDeleteSetButton()
+    local localeID = HandleLocale()
+    if currentTransmogSetId then
+        ShowDeleteSetConfirmation()
+    else
+        print(NO_SET_SELECTED_TO_DELETE[localeID] or NO_SET_SELECTED_TO_DELETE[0])
+    end
 end
 
 function RecoverMissingTransmogs()

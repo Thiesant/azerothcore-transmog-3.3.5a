@@ -228,10 +228,10 @@
 		<Frames>
 			<Button name="TransmogCloseButton" inherits="UIPanelCloseButton" >
 				<Size>
-					<AbsDimension x="28" y="28"/>
+					<AbsDimension x="26" y="26"/>
 				</Size>
 				<Anchors>
-					<Anchor point="TOPRIGHT" x="-48" y="-70"/>
+					<Anchor point="TOPRIGHT" x="-49" y="-72"/>
 				</Anchors>
 				<NormalTexture file="interface\addons\Transmogrify\Assets\Transmog-Close"/>
 				<HighlightTexture file="Interface\Buttons\ButtonHilight-Round" alphaMode="ADD"/>
@@ -537,9 +537,9 @@
 				</Scripts>
 			</CheckButton>
 			<Button name="RecoverTransmogButton">
-				<Size x="24" y="24"/>
+				<Size x="18" y="18"/>
 				<Anchors>
-					<Anchor point="CENTER" x="-160" y="175"/>
+					<Anchor point="CENTER" x="-161" y="175"/>
 				</Anchors>
 				<NormalTexture file="interface\addons\Transmogrify\Assets\Transmog-Recover"/>
 				<PushedTexture file="interface\addons\Transmogrify\Assets\Transmog-Recover"/>
@@ -558,6 +558,26 @@
 					</OnLeave>
 				</Scripts>
 			</Button>
+<Button name="TransmogSetButton" inherits="UIPanelButtonTemplate">
+    <Size x="160" y="22"/>
+    <Anchors>
+        <Anchor point="TOPRIGHT" relativeTo="RecoverTransmogButton" x="-125" y="-36"/>
+    </Anchors>
+	<NormalTexture file=""/>
+    <PushedTexture file=""/>
+    <HighlightTexture file=""/>
+    <DisabledTexture file=""/>
+    <Text name="$parentText" inherits="GameFontNormalSmall">
+        <Anchors>
+            <Anchor point="CENTER"/>
+        </Anchors>
+    </Text>
+    <Scripts>
+        <OnLoad function="TransmogSetButton_OnLoad"/>
+        <OnClick function="OnClickTransmogSetButton"/>
+    </Scripts>
+</Button>
+
 	</Frames>
 		<Scripts>
 			<OnLoad function="OnTransmogFrameLoad"/>
